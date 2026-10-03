@@ -29,7 +29,7 @@ function NameField({
   error: string | undefined;
 }) {
   return (
-    <Field label="Название" error={error} hint="Например, «Бухгалтер» или «Склад»">
+    <Field label="Название" error={error}>
       {({ id, describedBy, invalid }) => (
         <TextInput
           id={id}

@@ -7,6 +7,7 @@ import { cx } from '../components/ui.tsx';
 import { initials } from '../lib/format.ts';
 import { useTheme } from '../lib/theme.ts';
 import { useCurrentUser } from './session.tsx';
+import { RAIL_FADE } from './sidebar.ts';
 
 const MENU_ITEM =
   'group flex h-9 w-full cursor-pointer items-center gap-2.5 rounded-lg px-2.5 text-sm text-fg ' +
@@ -110,17 +111,19 @@ export function UserMenu() {
         onClick={() => (open ? hide() : show('last'))}
         onKeyDown={onTriggerKeyDown}
         className={cx(
-          'flex h-11 w-full cursor-pointer items-center gap-2.5 rounded-lg border border-transparent px-1.5 text-left',
-          'transition-colors duration-100 hover:bg-nav-hover aria-expanded:bg-nav-hover max-md:justify-center max-md:px-0',
+          // px-1: в режиме иконок аватар стоит по той же оси, что иконки разделов.
+          'flex h-11 w-full cursor-pointer items-center gap-2.5 rounded-lg border border-transparent px-1 text-left',
+          'transition-colors duration-100 hover:bg-nav-hover aria-expanded:bg-nav-hover',
         )}
       >
         <span
           aria-hidden
-          className="grid size-8 shrink-0 place-items-center rounded-full bg-accent-soft text-xs font-semibold text-accent-text"
+          className="grid size-8 shrink-0 place-items-center rounded-full
+          bg-sunken text-xs font-semibold text-accent-text border border-line"
         >
           {initials(me.fullName)}
         </span>
-        <span className="min-w-0 max-md:sr-only">
+        <span className={cx('min-w-0', RAIL_FADE)}>
           <span className="block truncate text-sm font-medium text-fg">{me.fullName}</span>
           <span className="block truncate text-xs text-subtle">
             {me.roles.map((role) => role.name).join(', ') || 'Без роли'}

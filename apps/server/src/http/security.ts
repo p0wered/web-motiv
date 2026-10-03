@@ -44,10 +44,10 @@ export async function registerSecurity(app: FastifyInstance): Promise<void> {
   });
 
   // Изменяющие запросы к API — только со своей страницы: свой заголовок (чужой сайт не может
-  // его выставить без CORS) и, если браузер прислал Origin, — совпадающий с адресом сервиса.
+  // его выставить без CORS) и, если браузер прислал Sec-Fetch-Site, — `same-origin`.
   app.addHook('onRequest', async (request, reply) => {
     if (SAFE_METHODS.has(request.method) || !isApi(request)) return;
-    if (request.headers[CSRF_HEADER] !== CSRF_HEADER_VALUE || !sameOrigin(request)) {
+    if (request.headers[CSRF_HEADER] !== CSRF_HEADER_VALUE || !fromOwnPage(request)) {
       return reply.code(403).send({ error: 'Запрос отклонён.' });
     }
   });
@@ -57,12 +57,13 @@ export function isApi(request: FastifyRequest): boolean {
   return request.url === '/api' || request.url.startsWith('/api/');
 }
 
-function sameOrigin(request: FastifyRequest): boolean {
-  const origin = request.headers.origin;
-  if (origin === undefined) return true;
-  try {
-    return new URL(origin).host === request.host;
-  } catch {
-    return false;
-  }
+/**
+ * Sec-Fetch-Site браузер выставляет сам (скрипт его не подделает) по адресу, который видит
+ * пользователь. Сравнивать Origin с Host нельзя: прокси (Vite в разработке, nginx у заказчика)
+ * подменяет Host на адрес сервера, и свои же запросы выглядели бы чужими. Без заголовка
+ * (старый браузер, curl) остаётся проверка CSRF-заголовка.
+ */
+function fromOwnPage(request: FastifyRequest): boolean {
+  const site = request.headers['sec-fetch-site'];
+  return site === undefined || site === 'same-origin';
 }

@@ -34,29 +34,30 @@ describe('app', () => {
     expect(response.statusCode).toBe(403);
   });
 
-  it('отклоняет изменяющий запрос с чужим Origin', async () => {
-    const { app } = await createTestApp();
-    const response = await app.inject({
-      method: 'POST',
-      url: '/api/health',
-      headers: {
-        [CSRF_HEADER]: CSRF_HEADER_VALUE,
-        host: 'motiv.local',
-        origin: 'https://evil.example',
-      },
-    });
-    expect(response.statusCode).toBe(403);
-  });
+  it.each(['cross-site', 'same-site', 'none'])(
+    'отклоняет изменяющий запрос не со своей страницы (Sec-Fetch-Site: %s)',
+    async (site) => {
+      const { app } = await createTestApp();
+      const response = await app.inject({
+        method: 'POST',
+        url: '/api/health',
+        headers: { [CSRF_HEADER]: CSRF_HEADER_VALUE, 'sec-fetch-site': site },
+      });
+      expect(response.statusCode).toBe(403);
+    },
+  );
 
-  it('пропускает изменяющий запрос со своей страницы', async () => {
+  it('пропускает свой запрос, даже если прокси подменил Host', async () => {
+    // Vite в разработке и nginx по умолчанию передают серверу Host своего upstream.
     const { app } = await createTestApp();
     const response = await app.inject({
       method: 'POST',
       url: '/api/health',
       headers: {
         [CSRF_HEADER]: CSRF_HEADER_VALUE,
-        host: 'motiv.local',
-        origin: 'https://motiv.local',
+        host: 'localhost:3000',
+        origin: 'http://localhost:5173',
+        'sec-fetch-site': 'same-origin',
       },
     });
     // Маршрута нет — но до него запрос дошёл.

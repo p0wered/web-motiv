@@ -52,11 +52,7 @@ export function UserNewPage() {
                 />
               )}
             </Field>
-            <Field
-              label="Логин"
-              error={errors.login}
-              hint="Латиница, цифры, точка, дефис — например, ivanov"
-            >
+            <Field label="Логин" error={errors.login}>
               {({ id, describedBy, invalid }) => (
                 <TextInput
                   id={id}

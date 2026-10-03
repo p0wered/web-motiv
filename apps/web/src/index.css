@@ -4,6 +4,9 @@
 /* Тёмная тема — класс .dark на <html> (ставит public/theme-init.js до отрисовки). */
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* Сайдбар сжат до иконок — атрибут data-rail на <aside> (см. app/sidebar.ts). */
+@custom-variant rail (&:where([data-rail], [data-rail] *));
+
 /*
  * Токены — как в WebPricer: нейтральные холодные серые + один синий акцент (действие, фокус,
  * выделение). Красный — ошибки и опасные действия.
@@ -19,7 +22,8 @@
   --muted: #52525b;
   --subtle: #6b6b74;
   --row-hover: #f4f5f7;
-  /* Наведение на пункт сайдбара — он лежит прямо на сером фоне страницы. */
+  --sidebar: #e9eaed;
+  --sidebar-subtle: #67676f;
   --nav-hover: rgb(24 24 27 / 0.05);
   --accent: #2768ff;
   --accent-hover: #1d4ed8;
@@ -29,10 +33,9 @@
   --selection: #d6e3fd;
   --danger: #d62012;
   --danger-soft: #fef3f2;
-  /* Заливка опасной кнопки: под белый текст в обеих темах. */
   --danger-solid: #d62012;
-  --success: #067647;
-  --success-soft: #ecfdf3;
+  --success: #09980b;
+  --success-soft: #09980b1a;
   --shadow-popover: 0 8px 24px -6px rgb(24 24 27 / 0.14), 0 2px 6px -2px rgb(24 24 27 / 0.08);
   --shadow-card: 0 1px 12px rgb(24 24 27 / 0.05), 0 1px 3px -1px rgb(24 24 27 / 0.04);
 }
@@ -48,6 +51,8 @@
   --muted: #a8a8b1;
   --subtle: #8c8c96;
   --row-hover: #1b1c20;
+  --sidebar: #060606;
+  --sidebar-subtle: #8c8c96;
   --nav-hover: rgb(255 255 255 / 0.05);
   --accent: #4679e6;
   --accent-hover: #4a7cec;
@@ -58,8 +63,8 @@
   --danger: #ff7a70;
   --danger-soft: #2a1614;
   --danger-solid: #c9302a;
-  --success: #47cd89;
-  --success-soft: #102419;
+  --success: #3fae40;
+  --success-soft: #3f93401a;
   --shadow-popover: 0 12px 32px -8px rgb(0 0 0 / 0.6), 0 2px 8px -2px rgb(0 0 0 / 0.5);
   --shadow-card: 0 1px 2px rgb(0 0 0 / 0.3);
 }
@@ -74,6 +79,7 @@
   --color-muted: var(--muted);
   --color-subtle: var(--subtle);
   --color-row-hover: var(--row-hover);
+  --color-sidebar: var(--sidebar);
   --color-nav-hover: var(--nav-hover);
   --color-accent: var(--accent);
   --color-accent-hover: var(--accent-hover);

@@ -31,7 +31,13 @@ export function AuditPage() {
         <div className="w-56">
           <Field label="Показать">
             {({ id }) => (
-              <Select id={id} value={group} options={GROUP_OPTIONS} onChange={setGroup} />
+              <Select
+                id={id}
+                value={group}
+                options={GROUP_OPTIONS}
+                onChange={setGroup}
+                className="rounded-xl"
+              />
             )}
           </Field>
         </div>
