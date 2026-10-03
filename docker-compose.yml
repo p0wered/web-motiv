@@ -1,0 +1,33 @@
+services:
+  webmotiv:
+    build: .
+    container_name: webmotiv
+    restart: unless-stopped
+    ports:
+      - '9092:3000'
+    # Значения берутся из файла .env рядом с этим файлом (см. .env.example).
+    environment:
+      TZ: Europe/Moscow
+      TRUST_PROXY: ${TRUST_PROXY:-false}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    volumes:
+      - ./data:/app/data
+    # Корневая ФС только для чтения: писать можно только в data/ и /tmp.
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    # Только то, что нужно entrypoint.sh: отдать data/ пользователю node и переключиться на него.
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETUID
+      - SETGID
+    # Без лимита Docker хранит логи контейнера бесконечно: держим не больше ~50 МБ (5 файлов по 10 МБ).
+    logging:
+      driver: local
+      options:
+        max-size: 10m
+        max-file: '5'

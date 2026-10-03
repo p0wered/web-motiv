@@ -1,0 +1,40 @@
+{
+  "name": "web-motiv",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "concurrently -n server,web -c blue,magenta \"PORT=3000 npm run dev -w @webmotiv/server\" \"npm run dev -w @webmotiv/web\"",
+    "build": "npm run build -w @webmotiv/web",
+    "start": "npm run start -w @webmotiv/server",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "eslint . --max-warnings=0",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "audit:prod": "npm audit --omit=dev --audit-level=high",
+    "check": "npm run format:check && npm run lint && npm run typecheck && npm run test && npm run audit:prod",
+    "db:generate": "drizzle-kit generate --config apps/server/drizzle.config.ts",
+    "cli": "node --env-file-if-exists=.env apps/server/src/cli.ts"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^24.19.0",
+    "concurrently": "^10.0.5",
+    "drizzle-kit": "1.0.0-rc.4",
+    "eslint": "^10.11.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17.12.0",
+    "prettier": "^3.9.9",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.71.0",
+    "vitest": "^5.0.2"
+  }
+}
