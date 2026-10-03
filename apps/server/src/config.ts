@@ -34,6 +34,26 @@ const envSchema = z.object({
   TRUST_PROXY: optional(trustProxySchema),
   WEB_DIST_DIR: optional(z.string()),
   DATA_DIR: optional(z.string()),
+  // Сессия: тайм-аут бездействия (минуты) и абсолютный срок (часы) — вход раз в рабочий день.
+  SESSION_IDLE_MINUTES: optional(
+    z.coerce
+      .number()
+      .int()
+      .min(1)
+      .max(24 * 60),
+  ),
+  SESSION_ABSOLUTE_HOURS: optional(
+    z.coerce
+      .number()
+      .int()
+      .min(1)
+      .max(24 * 30),
+  ),
+  // auto — флаг Secure у cookie, если запрос пришёл по HTTPS (за прокси — по X-Forwarded-Proto).
+  COOKIE_SECURE: optional(z.enum(['auto', 'true', 'false'])),
+  // Первый администратор, если сотрудников ещё нет; при первом входе пароль нужно сменить.
+  INITIAL_ADMIN_LOGIN: optional(z.string()),
+  INITIAL_ADMIN_PASSWORD: optional(z.string()),
 });
 
 export interface AppConfig {
@@ -46,6 +66,9 @@ export interface AppConfig {
   webDistDir: string;
   /** Каталог данных: БД, файлы, временные файлы. */
   dataDir: string;
+  session: { idleMs: number; absoluteMs: number };
+  cookieSecure: 'auto' | boolean;
+  initialAdmin: { login: string; password: string } | null;
 }
 
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
@@ -57,6 +80,8 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     throw new Error(`Некорректные переменные окружения: ${details}`);
   }
   const values = parsed.data;
+  const cookieSecure = values.COOKIE_SECURE ?? 'auto';
+  const adminLogin = values.INITIAL_ADMIN_LOGIN?.trim();
   return {
     host: values.HOST,
     port: values.PORT,
@@ -64,5 +89,14 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     trustProxy: values.TRUST_PROXY ?? false,
     webDistDir: values.WEB_DIST_DIR ?? path.resolve(import.meta.dirname, '../../web/dist'),
     dataDir: path.resolve(values.DATA_DIR ?? path.resolve(import.meta.dirname, '../../../data')),
+    session: {
+      idleMs: (values.SESSION_IDLE_MINUTES ?? 120) * 60_000,
+      absoluteMs: (values.SESSION_ABSOLUTE_HOURS ?? 12) * 3_600_000,
+    },
+    cookieSecure: cookieSecure === 'auto' ? 'auto' : cookieSecure === 'true',
+    initialAdmin:
+      adminLogin && values.INITIAL_ADMIN_PASSWORD
+        ? { login: adminLogin, password: values.INITIAL_ADMIN_PASSWORD }
+        : null,
   };
 }

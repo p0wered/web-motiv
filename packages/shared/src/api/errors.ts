@@ -8,8 +8,11 @@ export const validationErrorSchema = z.object({
 
 export type ValidationError = z.infer<typeof validationErrorSchema>;
 
-/** Любая другая ошибка API. */
-export const apiErrorSchema = z.object({ error: z.string() });
+/** Любая другая ошибка API; `code` — для ошибок, на которые интерфейс реагирует особо. */
+export const apiErrorSchema = z.object({ error: z.string(), code: z.string().optional() });
+
+/** Сотрудник вошёл с временным паролем: пока не задаст свой, остальное API закрыто. */
+export const PASSWORD_CHANGE_REQUIRED = 'password_change_required';
 
 /** Первое сообщение для каждого поля из ошибки zod. */
 export function fieldErrors(error: z.ZodError): Record<string, string> {

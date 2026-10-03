@@ -9,6 +9,11 @@ services:
     environment:
       TZ: Europe/Moscow
       TRUST_PROXY: ${TRUST_PROXY:-false}
+      COOKIE_SECURE: ${COOKIE_SECURE:-auto}
+      SESSION_IDLE_MINUTES: ${SESSION_IDLE_MINUTES:-120}
+      SESSION_ABSOLUTE_HOURS: ${SESSION_ABSOLUTE_HOURS:-12}
+      INITIAL_ADMIN_LOGIN: ${INITIAL_ADMIN_LOGIN:-}
+      INITIAL_ADMIN_PASSWORD: ${INITIAL_ADMIN_PASSWORD:-}
       LOG_LEVEL: ${LOG_LEVEL:-info}
     volumes:
       - ./data:/app/data

@@ -6,6 +6,8 @@ export class ApiError extends Error {
   override name = 'ApiError';
   readonly status: number;
   readonly fields: Record<string, string>;
+  /** Код ошибки от сервера, на который интерфейс реагирует особо. */
+  readonly code: string | undefined;
   readonly body: unknown;
 
   constructor(
@@ -18,6 +20,7 @@ export class ApiError extends Error {
     this.status = status;
     this.fields = fields;
     this.body = body;
+    this.code = (body as { code?: string } | undefined)?.code;
   }
 }
 

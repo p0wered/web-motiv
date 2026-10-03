@@ -18,3 +18,6 @@ export function openDb(filePath: string) {
 }
 
 export type AppDb = ReturnType<typeof openDb>;
+
+/** Транзакция: все изменения внутри неё и запись в журнал — одним целым. */
+export type Tx = Parameters<Parameters<AppDb['transaction']>[0]>[0];

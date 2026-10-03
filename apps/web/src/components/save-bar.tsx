@@ -11,6 +11,8 @@ interface SaveBarProps {
   submitLabel: string;
   icon: LucideIcon;
   onReset: () => void;
+  /** Текст слева, пока нет ошибки. */
+  message?: string;
 }
 
 /**
@@ -18,7 +20,14 @@ interface SaveBarProps {
  * от сохранённого. Кнопки внутри неё — поэтому их радиус не спорит с радиусом блоков.
  * Стоит внутри формы: «Сохранить» — её кнопка отправки.
  */
-export function SaveBar({ open, error, submitLabel, icon, onReset }: SaveBarProps) {
+export function SaveBar({
+  open,
+  error,
+  submitLabel,
+  icon,
+  onReset,
+  message = 'Есть несохранённые изменения',
+}: SaveBarProps) {
   const ref = useRef<HTMLDivElement>(null);
 
   // Строка свернулась с фокусом внутри (отменили или сохранили) — фокус переходит
@@ -42,7 +51,7 @@ export function SaveBar({ open, error, submitLabel, icon, onReset }: SaveBarProp
               error ? 'text-danger' : 'text-muted max-sm:sr-only',
             )}
           >
-            {error ?? 'Есть несохранённые изменения'}
+            {error ?? message}
           </p>
           <Button onClick={onReset}>Отменить</Button>
           {/* Кнопка не меняется во время сохранения — ход показывает надпись над блоком. */}

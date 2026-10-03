@@ -8,6 +8,9 @@ export function testConfig(overrides: Partial<AppConfig> = {}): AppConfig {
     trustProxy: false,
     webDistDir: '/nonexistent',
     dataDir: '/nonexistent',
+    session: { idleMs: 2 * 3_600_000, absoluteMs: 12 * 3_600_000 },
+    cookieSecure: false,
+    initialAdmin: null,
     ...overrides,
   };
 }

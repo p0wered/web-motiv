@@ -3,19 +3,18 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { CSRF_HEADER, CSRF_HEADER_VALUE } from '@webmotiv/shared';
 import { afterAll, describe, expect, it } from 'vitest';
-import { buildApp } from './app.ts';
-import { testConfig } from './test-support/test-config.ts';
+import { createTestApp } from './test-support/test-app.ts';
 
 describe('app', () => {
   it('отвечает на /api/health', async () => {
-    const app = await buildApp(testConfig());
+    const { app } = await createTestApp();
     const response = await app.inject({ method: 'GET', url: '/api/health' });
     expect(response.statusCode).toBe(200);
     expect(response.json()).toMatchObject({ status: 'ok' });
   });
 
   it('отдаёт заголовки безопасности', async () => {
-    const app = await buildApp(testConfig());
+    const { app } = await createTestApp();
     const { headers } = await app.inject({ method: 'GET', url: '/api/health' });
     const csp = String(headers['content-security-policy']);
     expect(csp).toContain("default-src 'self'");
@@ -30,13 +29,13 @@ describe('app', () => {
   });
 
   it('отклоняет изменяющий запрос без CSRF-заголовка', async () => {
-    const app = await buildApp(testConfig());
+    const { app } = await createTestApp();
     const response = await app.inject({ method: 'POST', url: '/api/health' });
     expect(response.statusCode).toBe(403);
   });
 
   it('отклоняет изменяющий запрос с чужим Origin', async () => {
-    const app = await buildApp(testConfig());
+    const { app } = await createTestApp();
     const response = await app.inject({
       method: 'POST',
       url: '/api/health',
@@ -50,7 +49,7 @@ describe('app', () => {
   });
 
   it('пропускает изменяющий запрос со своей страницы', async () => {
-    const app = await buildApp(testConfig());
+    const { app } = await createTestApp();
     const response = await app.inject({
       method: 'POST',
       url: '/api/health',
@@ -65,8 +64,8 @@ describe('app', () => {
   });
 
   it('без доверенного прокси не верит X-Forwarded-For', async () => {
-    const app = await buildApp(testConfig());
-    app.get('/api/ip', async (request) => ({ ip: request.ip }));
+    const { app } = await createTestApp();
+    app.get('/api/ip', { config: { access: 'public' } }, async (request) => ({ ip: request.ip }));
     const response = await app.inject({
       method: 'GET',
       url: '/api/ip',
@@ -76,8 +75,8 @@ describe('app', () => {
   });
 
   it('скрывает текст внутренней ошибки', async () => {
-    const app = await buildApp(testConfig());
-    app.get('/api/boom', async () => {
+    const { app } = await createTestApp();
+    app.get('/api/boom', { config: { access: 'public' } }, async () => {
       throw new Error('секретная подробность');
     });
     const response = await app.inject({ method: 'GET', url: '/api/boom' });
@@ -85,8 +84,13 @@ describe('app', () => {
     expect(response.body).not.toContain('секретная');
   });
 
+  it('не даёт зарегистрировать маршрут API без объявления доступа', async () => {
+    const { app } = await createTestApp();
+    expect(() => app.get('/api/forgotten', async () => 'ok')).toThrow(/config\.access/);
+  });
+
   it('неизвестный маршрут API — 404 в JSON', async () => {
-    const app = await buildApp(testConfig());
+    const { app } = await createTestApp();
     const response = await app.inject({ method: 'GET', url: '/api/nope' });
     expect(response.statusCode).toBe(404);
     expect(response.json()).toEqual({ error: 'Не найдено' });
@@ -98,15 +102,27 @@ describe('app', () => {
     afterAll(() => rmSync(dist, { recursive: true, force: true }));
 
     it('отдаёт index.html на любые страницы SPA', async () => {
-      const app = await buildApp(testConfig({ webDistDir: dist }));
+      const { app } = await createTestApp({ webDistDir: dist });
       const response = await app.inject({ method: 'GET', url: '/orders/42' });
       expect(response.statusCode).toBe(200);
       expect(response.body).toContain('WebMotiv');
       expect(response.headers['content-security-policy']).toBeDefined();
     });
 
+    it('несуществующий файл сборки — 404, а не страница', async () => {
+      const { app } = await createTestApp({ webDistDir: dist });
+      const response = await app.inject({ method: 'GET', url: '/assets/index-old.js' });
+      expect(response.statusCode).toBe(404);
+    });
+
+    it('страницу SPA браузер не кэширует', async () => {
+      const { app } = await createTestApp({ webDistDir: dist });
+      const response = await app.inject({ method: 'GET', url: '/users/2' });
+      expect(response.headers['cache-control']).toBe('no-cache');
+    });
+
     it('отвечает на HEAD к странице SPA', async () => {
-      const app = await buildApp(testConfig({ webDistDir: dist }));
+      const { app } = await createTestApp({ webDistDir: dist });
       const response = await app.inject({ method: 'HEAD', url: '/login' });
       expect(response.statusCode).toBe(200);
     });

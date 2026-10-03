@@ -29,6 +29,8 @@
   --selection: #d6e3fd;
   --danger: #d62012;
   --danger-soft: #fef3f2;
+  /* Заливка опасной кнопки: под белый текст в обеих темах. */
+  --danger-solid: #d62012;
   --success: #067647;
   --success-soft: #ecfdf3;
   --shadow-popover: 0 8px 24px -6px rgb(24 24 27 / 0.14), 0 2px 6px -2px rgb(24 24 27 / 0.08);
@@ -55,6 +57,7 @@
   --selection: #253a66;
   --danger: #ff7a70;
   --danger-soft: #2a1614;
+  --danger-solid: #c9302a;
   --success: #47cd89;
   --success-soft: #102419;
   --shadow-popover: 0 12px 32px -8px rgb(0 0 0 / 0.6), 0 2px 8px -2px rgb(0 0 0 / 0.5);
@@ -79,6 +82,7 @@
   --color-accent-soft: var(--accent-soft);
   --color-danger: var(--danger);
   --color-danger-soft: var(--danger-soft);
+  --color-danger-solid: var(--danger-solid);
   --color-success: var(--success);
   --color-success-soft: var(--success-soft);
   --shadow-popover: var(--shadow-popover);
