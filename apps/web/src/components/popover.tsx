@@ -1,4 +1,4 @@
-import { type RefObject, useState } from 'react';
+import { type RefObject, useCallback, useState } from 'react';
 import { cx } from './ui.tsx';
 
 type Placement = 'bottom' | 'top';
@@ -25,7 +25,10 @@ export function usePopover(
     setOpen(true);
   };
 
-  return { open, placement, show, hide: () => setOpen(false) };
+  // Стабильная ссылка: hide удобно передавать в зависимости эффектов.
+  const hide = useCallback(() => setOpen(false), []);
+
+  return { open, placement, show, hide };
 }
 
 /** Карточка выпадающей панели над содержимым и её появление; положение задаёт вызывающий. */

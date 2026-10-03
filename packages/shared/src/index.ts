@@ -4,6 +4,8 @@ export * from './api/errors.ts';
 export * from './api/events.ts';
 export * from './api/health.ts';
 export * from './api/roles.ts';
+export * from './api/stages.ts';
+export * from './api/templates.ts';
 export * from './api/users.ts';
 export * from './domain/orders.ts';
 export * from './domain/password-policy.ts';

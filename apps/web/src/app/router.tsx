@@ -1,4 +1,5 @@
-import { ClipboardList, Inbox, ListChecks, Workflow } from 'lucide-react';
+import { ClipboardList, Inbox } from 'lucide-react';
+import type { ReactNode } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router';
 import { AuditPage } from '../features/audit/audit-page.tsx';
 import { ChangePasswordPage } from '../features/auth/change-password-page.tsx';
@@ -7,11 +8,27 @@ import { PlaceholderPage } from '../features/placeholder/placeholder-page.tsx';
 import { ProfilePage } from '../features/profile/profile-page.tsx';
 import { RoleNewPage, RolePage } from '../features/roles/role-page.tsx';
 import { RolesPage } from '../features/roles/roles-page.tsx';
+import { StageNewPage, StagePage } from '../features/stages/stage-page.tsx';
+import { StagesPage } from '../features/stages/stages-page.tsx';
+import { TemplateNewPage, TemplatePage } from '../features/templates/template-page.tsx';
+import { TemplatesPage } from '../features/templates/templates-page.tsx';
 import { UserNewPage } from '../features/users/user-new-page.tsx';
 import { UserPage } from '../features/users/user-page.tsx';
 import { UsersPage } from '../features/users/users-page.tsx';
 import { AppShell } from './app-shell.tsx';
 import { RequirePermission, RequireSession } from './session.tsx';
+
+/** Список, новая запись и карточка — только с правом на этапы и шаблоны. */
+function catalogRoute(path: string, list: ReactNode, create: ReactNode, card: ReactNode) {
+  const guard = (element: ReactNode) => (
+    <RequirePermission permissions={['templates.manage']}>{element}</RequirePermission>
+  );
+  return [
+    { path, element: guard(list) },
+    { path: `${path}/new`, element: guard(create) },
+    { path: `${path}/:id`, element: guard(card) },
+  ];
+}
 
 export const router = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
@@ -48,32 +65,8 @@ export const router = createBrowserRouter([
               />
             ),
           },
-          {
-            path: '/templates',
-            element: (
-              <RequirePermission permissions={['templates.manage']}>
-                <PlaceholderPage
-                  title="Шаблоны"
-                  description="Последовательности этапов для заказов"
-                  icon={Workflow}
-                  phase={2}
-                />
-              </RequirePermission>
-            ),
-          },
-          {
-            path: '/stages',
-            element: (
-              <RequirePermission permissions={['templates.manage']}>
-                <PlaceholderPage
-                  title="Этапы"
-                  description="Библиотека этапов: поля, документы, исполнители"
-                  icon={ListChecks}
-                  phase={2}
-                />
-              </RequirePermission>
-            ),
-          },
+          ...catalogRoute('/templates', <TemplatesPage />, <TemplateNewPage />, <TemplatePage />),
+          ...catalogRoute('/stages', <StagesPage />, <StageNewPage />, <StagePage />),
           { path: '/profile', element: <ProfilePage /> },
           {
             path: '/users',

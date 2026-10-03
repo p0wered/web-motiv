@@ -7,9 +7,11 @@ import { actorOf } from './users-routes.ts';
 export function registerRolesRoutes(api: FastifyInstance, roles: RolesService): void {
   const manage = { config: { access: 'roles.manage' as const } };
 
-  // Список ролей нужен и для назначения ролей сотрудникам.
-  api.get('/roles', { config: { access: ['roles.manage', 'users.manage'] as const } }, async () =>
-    roles.list(),
+  // Список ролей нужен и для назначения ролей сотрудникам, и для выбора исполнителя этапа.
+  api.get(
+    '/roles',
+    { config: { access: ['roles.manage', 'users.manage', 'templates.manage'] as const } },
+    async () => roles.list(),
   );
 
   api.post('/roles', manage, async (request, reply) => {

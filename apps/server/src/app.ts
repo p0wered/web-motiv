@@ -7,6 +7,8 @@ import Fastify, { type FastifyBaseLogger, type FastifyError, type FastifyInstanc
 import { registerAuthRoutes } from './api/auth-routes.ts';
 import { registerEventsRoutes } from './api/events-routes.ts';
 import { registerRolesRoutes } from './api/roles-routes.ts';
+import { registerStagesRoutes } from './api/stages-routes.ts';
+import { registerTemplatesRoutes } from './api/templates-routes.ts';
 import { registerUsersRoutes } from './api/users-routes.ts';
 import { registerAccessControl } from './auth/access.ts';
 import { LoginLimiter } from './auth/login-limiter.ts';
@@ -17,6 +19,8 @@ import type { AppDb } from './db/db.ts';
 import { HttpError } from './http/errors.ts';
 import { isApi, registerSecurity } from './http/security.ts';
 import { RolesService } from './roles/roles-service.ts';
+import { StagesService } from './stages/stages-service.ts';
+import { TemplatesService } from './templates/templates-service.ts';
 import { UsersService } from './users/users-service.ts';
 
 export interface AppDeps {
@@ -81,6 +85,8 @@ export async function buildApp(config: AppConfig, deps: AppDeps): Promise<Fastif
       });
       registerUsersRoutes(api, new UsersService(deps.db, deps.hasher, sessions));
       registerRolesRoutes(api, new RolesService(deps.db));
+      registerStagesRoutes(api, new StagesService(deps.db));
+      registerTemplatesRoutes(api, new TemplatesService(deps.db));
       registerEventsRoutes(api, deps.db);
     },
     { prefix: '/api' },

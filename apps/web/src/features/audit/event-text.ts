@@ -43,6 +43,36 @@ function roleChanges(changes: Payload): string {
   return parts.join('; ');
 }
 
+function stageChanges(changes: Payload): string {
+  const parts: string[] = [];
+  const name = (changes.name ?? null) as { from?: unknown; to?: unknown } | null;
+  if (name) parts.push(`название «${str(name.from)}» → «${str(name.to)}»`);
+  if (changes.description) parts.push('описание');
+  const executor = (changes.executor ?? null) as { from?: unknown; to?: unknown } | null;
+  if (executor) parts.push(`исполнитель: ${str(executor.from)} → ${str(executor.to)}`);
+  const fields = (changes.fields ?? null) as Payload | null;
+  if (fields) {
+    const added = list(fields.added).join(', ');
+    const removed = list(fields.removed).join(', ');
+    const changed = list(fields.changed).join(', ');
+    if (added) parts.push(`добавлены поля: ${added}`);
+    if (removed) parts.push(`удалены поля: ${removed}`);
+    if (changed) parts.push(`изменены поля: ${changed}`);
+    if (fields.reordered) parts.push('порядок полей');
+  }
+  return parts.join('; ');
+}
+
+function templateChanges(changes: Payload): string {
+  const parts: string[] = [];
+  const name = (changes.name ?? null) as { from?: unknown; to?: unknown } | null;
+  if (name) parts.push(`название «${str(name.from)}» → «${str(name.to)}»`);
+  if (changes.description) parts.push('описание');
+  const stages = (changes.stages ?? null) as { from?: unknown; to?: unknown } | null;
+  if (stages) parts.push(`этапы: ${list(stages.to).join(' → ')}`);
+  return parts.join('; ');
+}
+
 /** Что произошло — одной строкой для журнала. */
 export function describeEvent(event: AuditEvent): string {
   const payload = event.payload ?? {};
@@ -76,6 +106,26 @@ export function describeEvent(event: AuditEvent): string {
       return `Изменена роль «${str(payload.name)}»: ${roleChanges((payload.changes ?? {}) as Payload)}`;
     case 'role.deleted':
       return `Удалена роль «${str(payload.name)}»`;
+    case 'stage.created':
+      return `Создан этап «${str(payload.name)}»`;
+    case 'stage.updated':
+      return `Изменён этап «${str(payload.name)}»: ${stageChanges((payload.changes ?? {}) as Payload)}`;
+    case 'stage.archived':
+      return `Этап «${str(payload.name)}» отправлен в архив`;
+    case 'stage.restored':
+      return `Этап «${str(payload.name)}» восстановлен из архива`;
+    case 'stage.deleted':
+      return `Удалён этап «${str(payload.name)}»`;
+    case 'template.created':
+      return `Создан шаблон «${str(payload.name)}»: ${list(payload.stages).join(' → ')}`;
+    case 'template.updated':
+      return `Изменён шаблон «${str(payload.name)}»: ${templateChanges((payload.changes ?? {}) as Payload)}`;
+    case 'template.archived':
+      return `Шаблон «${str(payload.name)}» отправлен в архив`;
+    case 'template.restored':
+      return `Шаблон «${str(payload.name)}» восстановлен из архива`;
+    case 'template.deleted':
+      return `Удалён шаблон «${str(payload.name)}»`;
   }
 }
 

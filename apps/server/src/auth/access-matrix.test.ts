@@ -70,7 +70,7 @@ const CASES: Case[] = [
     method: 'GET',
     url: '/api/roles',
     route: '/api/roles',
-    access: ['roles.manage', 'users.manage'],
+    access: ['roles.manage', 'users.manage', 'templates.manage'],
   },
   { method: 'POST', url: '/api/roles', route: '/api/roles', access: 'roles.manage', payload: {} },
   {
@@ -82,12 +82,61 @@ const CASES: Case[] = [
   },
   { method: 'DELETE', url: '/api/roles/999', route: '/api/roles/:id', access: 'roles.manage' },
   { method: 'GET', url: '/api/events', route: '/api/events', access: 'audit.view' },
+  { method: 'GET', url: '/api/stages', route: '/api/stages', access: 'templates.manage' },
+  {
+    method: 'POST',
+    url: '/api/stages',
+    route: '/api/stages',
+    access: 'templates.manage',
+    payload: {},
+  },
+  { method: 'GET', url: '/api/stages/999', route: '/api/stages/:id', access: 'templates.manage' },
+  {
+    method: 'PATCH',
+    url: '/api/stages/999',
+    route: '/api/stages/:id',
+    access: 'templates.manage',
+    payload: {},
+  },
+  {
+    method: 'DELETE',
+    url: '/api/stages/999',
+    route: '/api/stages/:id',
+    access: 'templates.manage',
+  },
+  { method: 'GET', url: '/api/templates', route: '/api/templates', access: 'templates.manage' },
+  {
+    method: 'POST',
+    url: '/api/templates',
+    route: '/api/templates',
+    access: 'templates.manage',
+    payload: {},
+  },
+  {
+    method: 'GET',
+    url: '/api/templates/999',
+    route: '/api/templates/:id',
+    access: 'templates.manage',
+  },
+  {
+    method: 'PATCH',
+    url: '/api/templates/999',
+    route: '/api/templates/:id',
+    access: 'templates.manage',
+    payload: {},
+  },
+  {
+    method: 'DELETE',
+    url: '/api/templates/999',
+    route: '/api/templates/:id',
+    access: 'templates.manage',
+  },
 ];
 
 /** Роль по умолчанию → ожидаемые права (см. bootstrap.ts). */
 const ROLES: Record<string, string[]> = {
-  Администратор: ['users.manage', 'roles.manage', 'audit.view'],
-  Руководитель: ['audit.view'],
+  Администратор: ['users.manage', 'roles.manage', 'audit.view', 'templates.manage'],
+  Руководитель: ['audit.view', 'templates.manage'],
   Менеджер: [],
   Склад: [],
 };
