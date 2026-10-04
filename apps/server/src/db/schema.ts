@@ -136,6 +136,8 @@ export const orders = sqliteTable(
     number: text('number').notNull().unique(),
     customer: text('customer').notNull(),
     comment: text('comment').notNull().default(''),
+    /** Номер и покупатель в нижнем регистре — для поиска: LIKE в SQLite не знает кириллицу. */
+    searchText: text('search_text').notNull().default(''),
     templateId: integer('template_id')
       .notNull()
       .references(() => templates.id),

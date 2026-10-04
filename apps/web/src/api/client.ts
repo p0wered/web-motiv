@@ -26,6 +26,7 @@ export class ApiError extends Error {
 
 interface RequestOptions<T> {
   method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+  /** JSON; FormData (загрузка файла) уходит как есть — тип с границей проставит браузер. */
   body?: unknown;
   signal?: AbortSignal;
   schema?: z.ZodType<T>;
@@ -39,14 +40,15 @@ export async function apiRequest<T = void>(
 ): Promise<T> {
   const headers: Record<string, string> = { Accept: 'application/json' };
   if (method !== 'GET') headers[CSRF_HEADER] = CSRF_HEADER_VALUE;
-  if (body !== undefined) headers['Content-Type'] = 'application/json';
+  const isForm = body instanceof FormData;
+  if (body !== undefined && !isForm) headers['Content-Type'] = 'application/json';
 
   let response: Response;
   try {
     response = await fetch(`/api${path}`, {
       method,
       headers,
-      body: body === undefined ? undefined : JSON.stringify(body),
+      body: body === undefined ? undefined : isForm ? body : JSON.stringify(body),
       signal,
       credentials: 'same-origin',
     });

@@ -11,6 +11,7 @@
     "@fastify/compress": "^9.2.0",
     "@fastify/cookie": "^11.1.2",
     "@fastify/helmet": "^13.1.1",
+    "@fastify/multipart": "^10.1.2",
     "@fastify/static": "^10.1.5",
     "@webmotiv/shared": "*",
     "better-sqlite3": "^13.0.3",

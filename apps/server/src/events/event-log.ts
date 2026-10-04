@@ -35,6 +35,8 @@ export interface EventFilter {
   limit: number;
   group?: EventGroup | undefined;
   actorId?: number | undefined;
+  /** История одного заказа. */
+  orderId?: number | undefined;
 }
 
 /** Порция событий от новых к старым и курсор следующей. */
@@ -54,6 +56,7 @@ export function queryEvents(
         filter.before ? lt(events.id, filter.before) : undefined,
         filter.group ? like(events.action, `${filter.group}.%`) : undefined,
         filter.actorId ? eq(events.actorId, filter.actorId) : undefined,
+        filter.orderId ? eq(events.orderId, filter.orderId) : undefined,
       ),
     )
     .orderBy(desc(events.id))

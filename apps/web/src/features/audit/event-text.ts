@@ -73,6 +73,16 @@ function templateChanges(changes: Payload): string {
   return parts.join('; ');
 }
 
+function orderChanges(changes: Payload): string {
+  const parts: string[] = [];
+  const customer = (changes.customer ?? null) as { from?: unknown; to?: unknown } | null;
+  if (customer) parts.push(`покупатель «${str(customer.from)}» → «${str(customer.to)}»`);
+  if (changes.comment) parts.push('комментарий');
+  const responsible = (changes.responsible ?? null) as { from?: unknown; to?: unknown } | null;
+  if (responsible) parts.push(`ответственный: ${str(responsible.from)} → ${str(responsible.to)}`);
+  return parts.join('; ');
+}
+
 /** Что произошло — одной строкой для журнала. */
 export function describeEvent(event: AuditEvent): string {
   const payload = event.payload ?? {};
@@ -126,6 +136,26 @@ export function describeEvent(event: AuditEvent): string {
       return `Шаблон «${str(payload.name)}» восстановлен из архива`;
     case 'template.deleted':
       return `Удалён шаблон «${str(payload.name)}»`;
+    case 'order.created':
+      return `Создан заказ ${str(payload.number)} для «${str(payload.customer)}» по шаблону «${str(payload.template)}»`;
+    case 'order.updated':
+      return `Изменён заказ ${str(payload.number)}: ${orderChanges((payload.changes ?? {}) as Payload)}`;
+    case 'order.stage_saved':
+      return `Заказ ${str(payload.number)}, этап «${str(payload.stage)}»: сохранены поля ${list(payload.fields).join(', ')}`;
+    case 'order.stage_completed':
+      return `Заказ ${str(payload.number)}: этап «${str(payload.stage)}» выполнен`;
+    case 'order.completed':
+      return `Заказ ${str(payload.number)} завершён`;
+    case 'order.cancelled': {
+      const reason = str(payload.reason);
+      return `Заказ ${str(payload.number)} отменён${reason ? `: ${reason}` : ''}`;
+    }
+    case 'order.file_uploaded':
+      return `Заказ ${str(payload.number)}, этап «${str(payload.stage)}»: прикреплён файл «${str(payload.name)}»`;
+    case 'order.file_deleted':
+      return `Заказ ${str(payload.number)}, этап «${str(payload.stage)}»: удалён файл «${str(payload.name)}»`;
+    case 'order.file_downloaded':
+      return `Заказ ${str(payload.number)}: ${payload.inline ? 'просмотрен' : 'скачан'} файл «${str(payload.name)}»`;
   }
 }
 

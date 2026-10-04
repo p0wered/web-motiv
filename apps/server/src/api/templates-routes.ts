@@ -11,7 +11,12 @@ import { actorOf } from './users-routes.ts';
 export function registerTemplatesRoutes(api: FastifyInstance, templates: TemplatesService): void {
   const access = { config: { access: 'templates.manage' as const } };
 
-  api.get('/templates', access, async () => templates.list());
+  // Список шаблонов нужен и тому, кто создаёт заказы.
+  api.get(
+    '/templates',
+    { config: { access: ['templates.manage', 'orders.create'] as const } },
+    async () => templates.list(),
+  );
 
   api.post('/templates', access, async (request, reply) => {
     const body = parseInput(createTemplateRequestSchema, request.body);

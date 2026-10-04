@@ -4,8 +4,10 @@ import fastifyCompress from '@fastify/compress';
 import fastifyStatic from '@fastify/static';
 import type { HealthResponse } from '@webmotiv/shared';
 import Fastify, { type FastifyBaseLogger, type FastifyError, type FastifyInstance } from 'fastify';
+import fastifyMultipart from '@fastify/multipart';
 import { registerAuthRoutes } from './api/auth-routes.ts';
 import { registerEventsRoutes } from './api/events-routes.ts';
+import { registerOrdersRoutes } from './api/orders-routes.ts';
 import { registerRolesRoutes } from './api/roles-routes.ts';
 import { registerStagesRoutes } from './api/stages-routes.ts';
 import { registerTemplatesRoutes } from './api/templates-routes.ts';
@@ -18,6 +20,9 @@ import type { AppConfig } from './config.ts';
 import type { AppDb } from './db/db.ts';
 import { HttpError } from './http/errors.ts';
 import { isApi, registerSecurity } from './http/security.ts';
+import { FilesService } from './orders/files-service.ts';
+import { OrdersService } from './orders/orders-service.ts';
+import { dataPaths } from './paths.ts';
 import { RolesService } from './roles/roles-service.ts';
 import { StagesService } from './stages/stages-service.ts';
 import { TemplatesService } from './templates/templates-service.ts';
@@ -51,6 +56,8 @@ export async function buildApp(config: AppConfig, deps: AppDeps): Promise<Fastif
   await registerSecurity(app);
   await registerAccessControl(app, { sessions, cookieSecure: config.cookieSecure });
   await app.register(fastifyCompress, { threshold: 1024 });
+  // Файлы — по одному за запрос; размер ограничивается при чтении потока (FilesService).
+  await app.register(fastifyMultipart, { limits: { files: 1, fields: 0, parts: 1 } });
 
   // Наружу — без внутренних подробностей: текст ошибки сервера уходит только в лог.
   app.setErrorHandler<FastifyError | HttpError>((error, request, reply) => {
@@ -87,6 +94,11 @@ export async function buildApp(config: AppConfig, deps: AppDeps): Promise<Fastif
       registerRolesRoutes(api, new RolesService(deps.db));
       registerStagesRoutes(api, new StagesService(deps.db));
       registerTemplatesRoutes(api, new TemplatesService(deps.db));
+      registerOrdersRoutes(
+        api,
+        new OrdersService(deps.db),
+        new FilesService(deps.db, dataPaths(config.dataDir)),
+      );
       registerEventsRoutes(api, deps.db);
     },
     { prefix: '/api' },

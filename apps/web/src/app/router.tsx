@@ -1,10 +1,12 @@
-import { ClipboardList, Inbox } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router';
 import { AuditPage } from '../features/audit/audit-page.tsx';
 import { ChangePasswordPage } from '../features/auth/change-password-page.tsx';
 import { LoginPage } from '../features/auth/login-page.tsx';
-import { PlaceholderPage } from '../features/placeholder/placeholder-page.tsx';
+import { OrderNewPage } from '../features/orders/order-new-page.tsx';
+import { OrderPage } from '../features/orders/order-page.tsx';
+import { OrdersPage } from '../features/orders/orders-page.tsx';
+import { TasksPage } from '../features/orders/tasks-page.tsx';
 import { ProfilePage } from '../features/profile/profile-page.tsx';
 import { RoleNewPage, RolePage } from '../features/roles/role-page.tsx';
 import { RolesPage } from '../features/roles/roles-page.tsx';
@@ -43,28 +45,17 @@ export const router = createBrowserRouter([
         element: <AppShell />,
         children: [
           { path: '/', element: <Navigate to="/tasks" replace /> },
+          { path: '/tasks', element: <TasksPage /> },
+          { path: '/orders', element: <OrdersPage /> },
           {
-            path: '/tasks',
+            path: '/orders/new',
             element: (
-              <PlaceholderPage
-                title="Мои задачи"
-                description="Заказы, в которых сейчас ваш этап"
-                icon={Inbox}
-                phase={3}
-              />
+              <RequirePermission permissions={['orders.create']}>
+                <OrderNewPage />
+              </RequirePermission>
             ),
           },
-          {
-            path: '/orders',
-            element: (
-              <PlaceholderPage
-                title="Заказы"
-                description="Все заказы, поиск и фильтры"
-                icon={ClipboardList}
-                phase={3}
-              />
-            ),
-          },
+          { path: '/orders/:id', element: <OrderPage /> },
           ...catalogRoute('/templates', <TemplatesPage />, <TemplateNewPage />, <TemplatePage />),
           ...catalogRoute('/stages', <StagesPage />, <StageNewPage />, <StagePage />),
           { path: '/profile', element: <ProfilePage /> },

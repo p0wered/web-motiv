@@ -51,6 +51,14 @@ export class UsersService {
     return this.toUsers(this.db, rows);
   }
 
+  directory(): { id: number; fullName: string; isActive: boolean }[] {
+    return this.db
+      .select({ id: users.id, fullName: users.fullName, isActive: users.isActive })
+      .from(users)
+      .orderBy(asc(users.fullName))
+      .all();
+  }
+
   get(id: number): UserDetail {
     const row = this.db.select().from(users).where(eq(users.id, id)).get();
     if (!row) throw notFound('Сотрудник не найден');

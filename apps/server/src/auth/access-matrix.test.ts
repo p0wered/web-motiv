@@ -5,7 +5,7 @@ import { addUser, createTestApp, CSRF, loginAs, type TestApp } from '../test-sup
 import type { Access } from './access.ts';
 
 interface Case {
-  method: 'GET' | 'POST' | 'PATCH' | 'DELETE';
+  method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   url: string;
   /** Как маршрут объявлен (для сверки с реестром). */
   route: string;
@@ -104,7 +104,12 @@ const CASES: Case[] = [
     route: '/api/stages/:id',
     access: 'templates.manage',
   },
-  { method: 'GET', url: '/api/templates', route: '/api/templates', access: 'templates.manage' },
+  {
+    method: 'GET',
+    url: '/api/templates',
+    route: '/api/templates',
+    access: ['templates.manage', 'orders.create'],
+  },
   {
     method: 'POST',
     url: '/api/templates',
@@ -131,13 +136,87 @@ const CASES: Case[] = [
     route: '/api/templates/:id',
     access: 'templates.manage',
   },
+  {
+    method: 'GET',
+    url: '/api/users/directory',
+    route: '/api/users/directory',
+    access: 'authenticated',
+  },
+  { method: 'GET', url: '/api/orders', route: '/api/orders', access: 'authenticated' },
+  {
+    method: 'GET',
+    url: '/api/orders/tasks/count',
+    route: '/api/orders/tasks/count',
+    access: 'authenticated',
+  },
+  {
+    method: 'POST',
+    url: '/api/orders',
+    route: '/api/orders',
+    access: 'orders.create',
+    payload: {},
+  },
+  { method: 'GET', url: '/api/orders/999', route: '/api/orders/:id', access: 'authenticated' },
+  {
+    method: 'PATCH',
+    url: '/api/orders/999',
+    route: '/api/orders/:id',
+    access: 'authenticated',
+    payload: {},
+  },
+  {
+    method: 'POST',
+    url: '/api/orders/999/cancel',
+    route: '/api/orders/:id/cancel',
+    access: 'orders.manage',
+    payload: {},
+  },
+  {
+    method: 'PUT',
+    url: '/api/orders/999/stages/1',
+    route: '/api/orders/:id/stages/:stageId',
+    access: 'authenticated',
+    payload: {},
+  },
+  {
+    method: 'POST',
+    url: '/api/orders/999/stages/1/complete',
+    route: '/api/orders/:id/stages/:stageId/complete',
+    access: 'authenticated',
+    payload: {},
+  },
+  {
+    method: 'POST',
+    url: '/api/orders/999/stages/1/fields/00000000-0000-4000-8000-000000000001/files',
+    route: '/api/orders/:id/stages/:stageId/fields/:fieldId/files',
+    access: 'authenticated',
+  },
+  {
+    method: 'GET',
+    url: '/api/files/00000000-0000-4000-8000-000000000001',
+    route: '/api/files/:fileId',
+    access: 'authenticated',
+  },
+  {
+    method: 'DELETE',
+    url: '/api/files/00000000-0000-4000-8000-000000000001',
+    route: '/api/files/:fileId',
+    access: 'authenticated',
+  },
 ];
 
 /** Роль по умолчанию → ожидаемые права (см. bootstrap.ts). */
 const ROLES: Record<string, string[]> = {
-  Администратор: ['users.manage', 'roles.manage', 'audit.view', 'templates.manage'],
-  Руководитель: ['audit.view', 'templates.manage'],
-  Менеджер: [],
+  Администратор: [
+    'users.manage',
+    'roles.manage',
+    'audit.view',
+    'templates.manage',
+    'orders.create',
+    'orders.manage',
+  ],
+  Руководитель: ['audit.view', 'templates.manage', 'orders.create', 'orders.manage'],
+  Менеджер: ['orders.create'],
   Склад: [],
 };
 

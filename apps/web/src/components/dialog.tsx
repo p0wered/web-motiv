@@ -1,6 +1,6 @@
 import { type ReactNode, useEffect, useId, useRef } from 'react';
 import { Button } from './button.tsx';
-import { Notice } from './ui.tsx';
+import { cx, Notice } from './ui.tsx';
 
 interface DialogProps {
   open: boolean;
@@ -10,13 +10,23 @@ interface DialogProps {
   children?: ReactNode;
   /** Кнопки справа внизу. */
   actions: ReactNode;
+  /** `lg` — просмотр документа: почти на весь экран. */
+  size?: 'md' | 'lg';
 }
 
 /**
  * Модальное окно на системном <dialog>: фокус внутри, Esc и клик мимо закрывают, фон
  * недоступен. Для подтверждения действий и разовых сообщений (временный пароль).
  */
-export function Dialog({ open, onClose, title, description, children, actions }: DialogProps) {
+export function Dialog({
+  open,
+  onClose,
+  title,
+  description,
+  children,
+  actions,
+  size = 'md',
+}: DialogProps) {
   const ref = useRef<HTMLDialogElement>(null);
   const titleId = useId();
 
@@ -38,12 +48,14 @@ export function Dialog({ open, onClose, title, description, children, actions }:
       onClick={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}
-      className={
-        'm-auto w-[min(440px,calc(100vw-32px))] rounded-2xl bg-surface p-0 text-fg shadow-popover ' +
-        'backdrop:bg-black/35 dark:ring-1 dark:ring-line'
-      }
+      className={cx(
+        'm-auto rounded-2xl bg-surface p-0 text-fg shadow-popover backdrop:bg-black/35 dark:ring-1 dark:ring-line',
+        size === 'lg'
+          ? 'h-[min(900px,calc(100vh-32px))] w-[min(1000px,calc(100vw-32px))]'
+          : 'w-[min(440px,calc(100vw-32px))]',
+      )}
     >
-      <div className="flex flex-col gap-4 p-5">
+      <div className={cx('flex flex-col gap-4 p-5', size === 'lg' && 'h-full')}>
         <div className="flex flex-col gap-1.5">
           <h2 id={titleId} className="text-[15px] font-semibold tracking-[-0.01em]">
             {title}

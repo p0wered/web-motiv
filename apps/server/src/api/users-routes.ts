@@ -14,6 +14,11 @@ export function registerUsersRoutes(api: FastifyInstance, users: UsersService): 
 
   api.get('/users', access, async () => users.list());
 
+  // Кого можно выбрать в поле «Сотрудник» и ответственным: имена всех, без логинов и ролей.
+  api.get('/users/directory', { config: { access: 'authenticated' } }, async () =>
+    users.directory(),
+  );
+
   api.post('/users', access, async (request, reply) => {
     const body = parseInput(createUserRequestSchema, request.body);
     return reply.code(201).send(await users.create(body, actorOf(request)));

@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { useId } from 'react';
 import { NavLink, Outlet } from 'react-router';
+import { useTaskCount } from '../api/orders.ts';
 import { cx } from '../components/ui.tsx';
 import { WebMotivMark } from '../components/webmotiv-mark.tsx';
 import { useCurrentUser } from './session.tsx';
@@ -25,6 +26,8 @@ interface NavItem {
   icon: LucideIcon;
   /** Пункт виден, только если у сотрудника есть это право. */
   permission?: Permission;
+  /** Число справа — сколько заказов ждёт сотрудника. */
+  badge?: number | undefined;
 }
 
 const MAIN_NAV: NavItem[] = [
@@ -49,7 +52,7 @@ const NAV_ITEM =
 
 const TOGGLE_ICON = { 'aria-hidden': true, size: 16, strokeWidth: 1.75 } as const;
 
-function SidebarLink({ to, label, icon: Icon }: NavItem) {
+function SidebarLink({ to, label, icon: Icon, badge }: NavItem) {
   return (
     <NavLink
       to={to}
@@ -75,6 +78,24 @@ function SidebarLink({ to, label, icon: Icon }: NavItem) {
             )}
           />
           <span className={cx('truncate', RAIL_FADE)}>{label}</span>
+          {badge !== undefined && badge > 0 && (
+            <>
+              <span
+                aria-label={`${badge} ждут вас`}
+                className={cx(
+                  'tabular ml-auto rounded-full bg-accent px-1.5 text-xs leading-5 font-medium text-accent-fg',
+                  RAIL_FADE,
+                )}
+              >
+                {badge}
+              </span>
+              {/* В режиме иконок числа не видно — только точка на иконке. */}
+              <span
+                aria-hidden
+                className="absolute ml-3 -mt-3 hidden size-2 rounded-full bg-accent rail:block"
+              />
+            </>
+          )}
         </>
       )}
     </NavLink>
@@ -87,6 +108,7 @@ function SidebarLink({ to, label, icon: Icon }: NavItem) {
  */
 export function AppShell() {
   const me = useCurrentUser();
+  const taskCount = useTaskCount();
   const { rail, canToggle, toggle } = useSidebar();
   const sidebarId = useId();
   const setup = SETUP_NAV.filter(
@@ -111,7 +133,9 @@ export function AppShell() {
             <span className={cx('min-w-0 flex-1 overflow-hidden', RAIL_FADE)}>
               <span className="flex items-center gap-2 pl-1.5">
                 <WebMotivMark className="size-6 shrink-0" />
-                <span className="truncate text-base font-semibold tracking-[-0.01em]">WebMotiv</span>
+                <span className="truncate text-base font-semibold tracking-[-0.01em]">
+                  WebMotiv
+                </span>
               </span>
             </span>
             <button
@@ -132,7 +156,11 @@ export function AppShell() {
         <nav aria-label="Разделы" className="flex flex-col gap-5">
           <div className="flex flex-col gap-0.5">
             {MAIN_NAV.map((item) => (
-              <SidebarLink key={item.to} {...item} />
+              <SidebarLink
+                key={item.to}
+                {...item}
+                badge={item.to === '/tasks' ? taskCount.data?.count : undefined}
+              />
             ))}
           </div>
           {setup.length > 0 && (

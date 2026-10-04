@@ -33,3 +33,13 @@ describe('initials', () => {
     expect(initials('admin')).toBe('A');
   });
 });
+
+describe('formatDate, formatFileSize', () => {
+  it('дата словами и размер файла', async () => {
+    const { formatDate, formatFileSize } = await import('./format.ts');
+    expect(formatDate('2026-10-04')).toMatch(/4 октября 2026/);
+    expect(formatFileSize(512)).toBe('512 Б');
+    expect(formatFileSize(1536)).toBe('1,5 КБ');
+    expect(formatFileSize(25 * 1024 * 1024)).toBe('25 МБ');
+  });
+});

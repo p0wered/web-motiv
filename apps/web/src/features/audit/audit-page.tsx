@@ -18,6 +18,7 @@ const GROUP_OPTIONS: SelectOption<GroupFilter>[] = [
   { value: 'role', label: 'Роли' },
   { value: 'stage', label: 'Этапы' },
   { value: 'template', label: 'Шаблоны' },
+  { value: 'order', label: 'Заказы' },
 ];
 
 export function AuditPage() {

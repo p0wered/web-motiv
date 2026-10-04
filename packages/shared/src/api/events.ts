@@ -25,12 +25,21 @@ export const EVENT_ACTIONS = [
   'template.archived',
   'template.restored',
   'template.deleted',
+  'order.created',
+  'order.updated',
+  'order.stage_saved',
+  'order.stage_completed',
+  'order.completed',
+  'order.cancelled',
+  'order.file_uploaded',
+  'order.file_deleted',
+  'order.file_downloaded',
 ] as const;
 
 export type EventAction = (typeof EVENT_ACTIONS)[number];
 
 /** Группы для фильтра журнала: по первой части действия. */
-export const EVENT_GROUPS = ['auth', 'user', 'role', 'stage', 'template'] as const;
+export const EVENT_GROUPS = ['auth', 'user', 'role', 'stage', 'template', 'order'] as const;
 export type EventGroup = (typeof EVENT_GROUPS)[number];
 
 export const eventSchema = z.object({

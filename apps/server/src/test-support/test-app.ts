@@ -1,3 +1,6 @@
+import { mkdtempSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
 import { inArray } from 'drizzle-orm';
 import type { FastifyInstance } from 'fastify';
 import { buildApp } from '../app.ts';
@@ -7,6 +10,7 @@ import { ensureDefaultRoles } from '../bootstrap.ts';
 import type { AppConfig } from '../config.ts';
 import { type AppDb, openDb } from '../db/db.ts';
 import { roles, userRoles, users } from '../db/schema.ts';
+import { dataPaths, ensureDataDirs } from '../paths.ts';
 import { testConfig } from './test-config.ts';
 
 /** Слабые параметры scrypt — только чтобы тесты не ждали по 300 мс на пароль. */
@@ -23,10 +27,13 @@ export interface TestApp {
 
 export async function createTestApp(config: Partial<AppConfig> = {}): Promise<TestApp> {
   const db = openDb(':memory:');
+  // Свой каталог данных на каждое приложение — для загружаемых файлов.
+  const dataDir = mkdtempSync(path.join(tmpdir(), 'webmotiv-test-'));
+  ensureDataDirs(dataPaths(dataDir));
   ensureDefaultRoles(db);
   const hasher = testHasher();
   const loginLimiter = new LoginLimiter(DEFAULT_LIMITER_OPTIONS);
-  const app = await buildApp(testConfig(config), { db, hasher, loginLimiter });
+  const app = await buildApp(testConfig({ dataDir, ...config }), { db, hasher, loginLimiter });
   return { app, db, hasher, loginLimiter };
 }
 

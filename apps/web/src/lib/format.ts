@@ -66,3 +66,35 @@ export function initials(fullName: string): string {
       .join('') || '?'
   ).toUpperCase();
 }
+
+const dateOnly = new Intl.DateTimeFormat('ru-RU', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+});
+
+/** «2026-10-04» → «4 октября 2026 г.». */
+export function formatDate(value: string): string {
+  const [year, month, day] = value.split('-').map(Number);
+  if (!year || !month || !day) return value;
+  return dateOnly.format(new Date(year, month - 1, day));
+}
+
+const number = new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 6 });
+
+export function formatNumber(value: number): string {
+  return number.format(value);
+}
+
+/** «1,2 МБ», «340 КБ». */
+export function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} Б`;
+  const units = ['КБ', 'МБ', 'ГБ'];
+  let size = bytes / 1024;
+  let unit = 0;
+  while (size >= 1024 && unit < units.length - 1) {
+    size /= 1024;
+    unit++;
+  }
+  return `${size.toLocaleString('ru-RU', { maximumFractionDigits: size < 10 ? 1 : 0 })} ${units[unit]}`;
+}
