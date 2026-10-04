@@ -179,7 +179,9 @@ function AccessSection({ user }: { user: UserDetail }) {
           }
           action={
             user.isActive ? (
-              <Button onClick={() => setConfirm('block')}>Заблокировать</Button>
+              <Button variant="danger-soft" onClick={() => setConfirm('block')}>
+                Заблокировать
+              </Button>
             ) : (
               <Button disabled={update.isPending} onClick={() => update.mutate({ isActive: true })}>
                 Разблокировать
@@ -237,7 +239,7 @@ function SessionsSection({ user }: { user: UserDetail }) {
       description="Где сейчас выполнен вход в учётную запись сотрудника"
       aside={
         user.sessions.length > 0 && (
-          <Button variant="ghost" onClick={() => setConfirm(true)}>
+          <Button variant="danger-ghost" onClick={() => setConfirm(true)}>
             Завершить все
           </Button>
         )
@@ -285,9 +287,7 @@ export function UserPage() {
           <AccountSection user={user.data} />
           <RolesSection user={user.data} />
           {self ? (
-            <p className="px-1 text-[13px] text-subtle">
-              Это ваша учётная запись: пароль и сеансы — в профиле, заблокировать себя нельзя.
-            </p>
+            <></>
           ) : (
             <>
               <AccessSection user={user.data} />

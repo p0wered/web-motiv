@@ -67,7 +67,7 @@ export function TemplatesPage() {
             value={view}
             onChange={setView}
             segments={[
-              { value: 'active', label: 'Действующие' },
+              { value: 'active', label: 'Активные' },
               { value: 'archived', label: 'Архив', count: archivedCount },
             ]}
           />
@@ -86,14 +86,7 @@ export function TemplatesPage() {
         <LoadError error={templates.error} onRetry={() => void templates.refetch()} />
       )}
       {templates.data && rows.length === 0 && (
-        <EmptyState
-          title={view === 'archived' ? 'Архив пуст' : 'Шаблонов пока нет'}
-          text={
-            view === 'archived'
-              ? undefined
-              : 'Шаблон — порядок этапов заказа, например «Заказ под поставку».'
-          }
-        />
+        <EmptyState title={view === 'archived' ? 'Архив пуст' : 'Шаблонов пока нет'} />
       )}
       {rows.length > 0 && (
         <Table

@@ -10,6 +10,8 @@ interface NewPasswordFieldsProps {
   onConfirmationChange: (value: string) => void;
   /** Ошибки от сервера — важнее подсказок на лету. */
   errors: Record<string, string>;
+  /** Общая подсказка под полем; требования при вводе показываются в любом случае. */
+  showHint?: boolean;
 }
 
 export const PASSWORD_HINT = `Не короче ${PASSWORD_MIN_LENGTH} символов. Удобно взять фразу из нескольких слов — заглавные буквы и символы не обязательны.`;
@@ -26,6 +28,7 @@ export function NewPasswordFields({
   onPasswordChange,
   onConfirmationChange,
   errors,
+  showHint = true,
 }: NewPasswordFieldsProps) {
   const problem = password ? passwordProblem(password, { login }) : null;
   const mismatch =
@@ -37,7 +40,13 @@ export function NewPasswordFields({
       <Field
         label="Новый пароль"
         error={errors.password}
-        hint={problem && password.length >= PASSWORD_MIN_LENGTH ? problem : PASSWORD_HINT}
+        hint={
+          problem && password.length >= PASSWORD_MIN_LENGTH
+            ? problem
+            : showHint
+              ? PASSWORD_HINT
+              : undefined
+        }
       >
         {({ id, describedBy, invalid }) => (
           <PasswordInput

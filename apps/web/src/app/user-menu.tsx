@@ -10,7 +10,7 @@ import { useCurrentUser } from './session.tsx';
 import { RAIL_FADE } from './sidebar.ts';
 
 const MENU_ITEM =
-  'group flex h-9 w-full cursor-pointer items-center gap-2.5 rounded-lg px-2.5 text-sm text-fg ' +
+  'group flex h-9 w-full cursor-pointer items-center gap-2.5 rounded-xl px-2.5 text-sm text-fg ' +
   'transition-colors duration-100 outline-none hover:bg-row-hover focus-visible:bg-row-hover';
 
 const MENU_ICON =

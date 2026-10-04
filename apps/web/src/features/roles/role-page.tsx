@@ -197,7 +197,7 @@ function DeleteSection({ role }: { role: Role }) {
               ? 'Сотрудники с этой ролью потеряют её права. Сами сотрудники останутся.'
               : 'Роль ни у кого не назначена.'}
         </p>
-        <Button disabled={blocked} onClick={() => setConfirm(true)}>
+        <Button variant="danger-soft" disabled={blocked} onClick={() => setConfirm(true)}>
           Удалить роль
         </Button>
       </div>

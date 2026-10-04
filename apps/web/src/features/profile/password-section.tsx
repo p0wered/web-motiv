@@ -78,6 +78,7 @@ export function PasswordSection({ login }: { login: string }) {
             onPasswordChange={(password) => setForm({ ...form, password })}
             onConfirmationChange={(confirmation) => setForm({ ...form, confirmation })}
             errors={errors}
+            showHint={false}
           />
         </div>
       </Section>

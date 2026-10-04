@@ -75,6 +75,7 @@ export function ArchiveSection({
           text={deleteBlocked ?? `Ещё нигде не использовался — можно удалить совсем.`}
           action={
             <Button
+              variant="danger-soft"
               icon={Trash2}
               disabled={pending || deleteBlocked !== null}
               onClick={() => setConfirmDelete(true)}

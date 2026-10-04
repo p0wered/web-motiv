@@ -235,7 +235,7 @@ export function Select<T extends string>({
                   'cursor-pointer text-sm transition-colors duration-100',
                   grid
                     ? 'tabular grid h-9 place-items-center rounded-lg'
-                    : 'flex h-9 items-center justify-between gap-6 rounded-lg pr-2 pl-2.5 whitespace-nowrap',
+                    : 'flex h-9 items-center justify-between gap-6 rounded-xl pr-2 pl-2.5 whitespace-nowrap',
                   grid && isSelected
                     ? 'bg-accent font-medium text-accent-fg'
                     : cx('text-fg', isActive && 'bg-row-hover', isSelected && 'font-medium'),

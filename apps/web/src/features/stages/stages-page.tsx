@@ -88,7 +88,7 @@ export function StagesPage() {
             value={view}
             onChange={setView}
             segments={[
-              { value: 'active', label: 'Действующие' },
+              { value: 'active', label: 'Активные' },
               { value: 'archived', label: 'Архив', count: archivedCount },
             ]}
           />
@@ -102,14 +102,7 @@ export function StagesPage() {
       {stages.isPending && <Loading />}
       {stages.isError && <LoadError error={stages.error} onRetry={() => void stages.refetch()} />}
       {stages.data && rows.length === 0 && (
-        <EmptyState
-          title={view === 'archived' ? 'Архив пуст' : 'Этапов пока нет'}
-          text={
-            view === 'archived'
-              ? undefined
-              : 'Этап — шаг заказа: например, «Счёт» или «Отгрузка». Из этапов собираются шаблоны.'
-          }
-        />
+        <EmptyState title={view === 'archived' ? 'Архив пуст' : 'Этапов пока нет'} />
       )}
       {rows.length > 0 && (
         <Table

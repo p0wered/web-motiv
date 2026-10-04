@@ -66,7 +66,7 @@ export class StagesService {
     this.db = db;
   }
 
-  /** Все этапы, действующие и архивные, по алфавиту. */
+  /** Все этапы, активные и архивные, по алфавиту. */
   list(): Stage[] {
     const rows = this.db.select().from(stages).orderBy(asc(stages.name)).all();
     return this.toStages(this.db, rows);

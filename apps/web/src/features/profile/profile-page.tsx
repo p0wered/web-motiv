@@ -12,9 +12,9 @@ import { SessionList } from './session-list.tsx';
 
 function InfoRow({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div className="flex flex-wrap items-baseline gap-x-6 gap-y-1">
+    <div className="flex items-baseline gap-x-6">
       <dt className="w-24 shrink-0 text-[13px] text-subtle">{label}</dt>
-      <dd className="min-w-0 text-sm text-fg">{children}</dd>
+      <dd className="min-w-0 flex-1 text-sm text-fg">{children}</dd>
     </div>
   );
 }
@@ -29,10 +29,10 @@ function SessionsSection() {
   return (
     <Section
       title="Сеансы"
-      description="Где выполнен вход в вашу учётную запись. Незнакомый сеанс — завершите его и смените пароль."
+      description="Где выполнен вход в вашу учётную запись"
       aside={
         others > 0 && (
-          <Button variant="ghost" onClick={() => setConfirmOthers(true)}>
+          <Button variant="danger-ghost" onClick={() => setConfirmOthers(true)}>
             Завершить остальные
           </Button>
         )
@@ -49,7 +49,7 @@ function SessionsSection() {
           action={(session) =>
             !session.current && (
               <Button
-                variant="ghost"
+                variant="danger-ghost"
                 disabled={terminate.isPending}
                 onClick={() => terminate.mutate(session.id)}
               >
