@@ -5,9 +5,11 @@ import { cx } from './ui.tsx';
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
 /** `lg` — в хедере: по высоте совпадает со строкой поиска (h-10). */
 type ButtonSize = 'md' | 'lg';
+/** `xl` — у кнопок действий в шапке страницы. */
+type ButtonRounded = 'lg' | 'xl';
 
 const BUTTON_BASE =
-  'inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg text-sm font-medium ' +
+  'inline-flex shrink-0 items-center justify-center gap-1.5 text-sm font-medium ' +
   'whitespace-nowrap transition-colors duration-150 select-none hover:cursor-pointer disabled:pointer-events-none disabled:opacity-50';
 
 /** Наведение у secondary и ghost: рамка и подсветка акцентом. */
@@ -33,9 +35,12 @@ const BUTTON_SIZES: Record<ButtonSize, { text: string; square: string }> = {
   lg: { text: 'h-10 px-3', square: 'size-10' },
 };
 
+const BUTTON_ROUNDED: Record<ButtonRounded, string> = { lg: 'rounded-lg', xl: 'rounded-xl' };
+
 interface ButtonClassOptions {
   variant?: ButtonVariant;
   size?: ButtonSize;
+  rounded?: ButtonRounded;
   /** Кнопка только с иконкой. */
   square?: boolean;
   pressed?: boolean | undefined;
@@ -46,6 +51,7 @@ interface ButtonClassOptions {
 export function buttonClasses({
   variant = 'secondary',
   size = 'md',
+  rounded = 'lg',
   square = false,
   pressed = false,
   className,
@@ -53,6 +59,7 @@ export function buttonClasses({
   const sizes = BUTTON_SIZES[size];
   return cx(
     BUTTON_BASE,
+    BUTTON_ROUNDED[rounded],
     square ? sizes.square : sizes.text,
     pressed ? BUTTON_PRESSED : BUTTON_VARIANTS[variant],
     className,
@@ -62,6 +69,7 @@ export function buttonClasses({
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
   size?: ButtonSize;
+  rounded?: ButtonRounded;
   icon?: LucideIcon;
   /** Нажатое состояние переключателя. */
   pressed?: boolean;
@@ -71,6 +79,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
   {
     variant = 'secondary',
     size = 'md',
+    rounded,
     icon: Icon,
     pressed,
     className,
@@ -85,7 +94,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       ref={ref}
       type={type}
       aria-pressed={pressed}
-      className={buttonClasses({ variant, size, square: !children, pressed, className })}
+      className={buttonClasses({ variant, size, rounded, square: !children, pressed, className })}
       {...props}
     >
       {Icon && <Icon aria-hidden size={15} strokeWidth={1.75} />}

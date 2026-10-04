@@ -71,7 +71,10 @@ export function TemplatesPage() {
               { value: 'archived', label: 'Архив', count: archivedCount },
             ]}
           />
-          <Link to="/templates/new" className={buttonClasses({ variant: 'primary' })}>
+          <Link
+            to="/templates/new"
+            className={buttonClasses({ variant: 'primary', rounded: 'xl' })}
+          >
             <Plus aria-hidden size={15} strokeWidth={1.75} />
             Добавить шаблон
           </Link>

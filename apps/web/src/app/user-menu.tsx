@@ -112,7 +112,7 @@ export function UserMenu() {
         onKeyDown={onTriggerKeyDown}
         className={cx(
           // px-1: в режиме иконок аватар стоит по той же оси, что иконки разделов.
-          'flex h-11 w-full cursor-pointer items-center gap-2.5 rounded-lg border border-transparent px-1 text-left',
+          'flex h-11 w-full cursor-pointer items-center gap-2.5 rounded-xl border border-transparent px-1 text-left',
           'transition-colors duration-100 hover:bg-nav-hover aria-expanded:bg-nav-hover',
         )}
       >

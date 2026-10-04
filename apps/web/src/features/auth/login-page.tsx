@@ -87,9 +87,6 @@ export function LoginPage() {
             {login.isPending ? 'Вход…' : 'Войти'}
           </Button>
         </form>
-        <p className="max-w-95 text-center text-[13px] text-subtle">
-          Забыли пароль — обратитесь к администратору, он выдаст временный.
-        </p>
       </main>
     </div>
   );

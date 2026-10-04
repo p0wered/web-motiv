@@ -28,7 +28,6 @@ export function AuditPage() {
   return (
     <Page
       title="Журнал"
-      description="Кто, что и когда сделал. Записи нельзя изменить или удалить"
       actions={
         <div className="w-56">
           <Field label="Показать">

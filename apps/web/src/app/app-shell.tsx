@@ -43,7 +43,7 @@ const SETUP_NAV: NavItem[] = [
 // Отступы подобраны так, чтобы в режиме иконок (w-16) иконка стояла ровно по центру
 // и при сворачивании не сдвигалась.
 const NAV_ITEM =
-  'group flex h-9 items-center gap-2.5 rounded-lg border border-transparent px-3 text-sm ' +
+  'group flex h-9 items-center gap-2.5 rounded-xl border border-transparent px-3 text-sm ' +
   'transition-colors duration-100';
 
 const TOGGLE_ICON = { 'aria-hidden': true, size: 16, strokeWidth: 1.75 } as const;

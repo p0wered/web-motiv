@@ -70,7 +70,7 @@ export function UsersPage() {
       title="Сотрудники"
       description="Учётные записи, роли и доступ"
       actions={
-        <Link to="/users/new" className={buttonClasses({ variant: 'primary' })}>
+        <Link to="/users/new" className={buttonClasses({ variant: 'primary', rounded: 'xl' })}>
           <UserPlus aria-hidden size={15} strokeWidth={1.75} />
           Добавить сотрудника
         </Link>

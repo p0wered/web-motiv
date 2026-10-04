@@ -44,9 +44,9 @@ export function RolesPage() {
   return (
     <Page
       title="Роли"
-      description="Должности и их права. Роль — ещё и исполнитель этапов заказа"
+      description="Должности и их права"
       actions={
-        <Link to="/roles/new" className={buttonClasses({ variant: 'primary' })}>
+        <Link to="/roles/new" className={buttonClasses({ variant: 'primary', rounded: 'xl' })}>
           <Plus aria-hidden size={15} strokeWidth={1.75} />
           Добавить роль
         </Link>

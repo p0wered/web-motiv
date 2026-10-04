@@ -92,7 +92,7 @@ export function StagesPage() {
               { value: 'archived', label: 'Архив', count: archivedCount },
             ]}
           />
-          <Link to="/stages/new" className={buttonClasses({ variant: 'primary' })}>
+          <Link to="/stages/new" className={buttonClasses({ variant: 'primary', rounded: 'xl' })}>
             <Plus aria-hidden size={15} strokeWidth={1.75} />
             Добавить этап
           </Link>
