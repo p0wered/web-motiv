@@ -14,6 +14,7 @@ import {
 import { useId } from 'react';
 import { NavLink, Outlet } from 'react-router';
 import { cx } from '../components/ui.tsx';
+import { WebMotivMark } from '../components/webmotiv-mark.tsx';
 import { useCurrentUser } from './session.tsx';
 import { RAIL_FADE, useSidebar } from './sidebar.ts';
 import { UserMenu } from './user-menu.tsx';
@@ -101,15 +102,16 @@ export function AppShell() {
         className="flex w-60 shrink-0 flex-col gap-5 p-3 rail:w-16 bg-sidebar [--subtle:var(--sidebar-subtle)]
         transition-[width] duration-200 ease-[cubic-bezier(0.32,0.72,0,1)] motion-reduce:transition-none"
       >
-        {/* Название гаснет и сжимается до нуля — кнопка уезжает вместе с краем сайдбара
+        {/* Знак и название гаснут и сжимаются до нуля — кнопка уезжает вместе с краем сайдбара
             и в режиме иконок встаёт по их оси. На узком экране шапки нет: сворачивать нечего. */}
         {canToggle && (
           // pl-1.75: +1px рамки у пунктов меню — кнопка и текст на одной оси с иконками.
           <div className="flex h-9 items-center overflow-hidden pr-1.5 pl-1.75">
             {/* Отступ — у вложенного span: у самого flex-элемента он не сжался бы до нуля. */}
             <span className={cx('min-w-0 flex-1 overflow-hidden', RAIL_FADE)}>
-              <span className="block truncate pl-1.5 text-base font-semibold tracking-[-0.01em]">
-                WebMotiv
+              <span className="flex items-center gap-2 pl-1.5">
+                <WebMotivMark className="size-6 shrink-0" />
+                <span className="truncate text-base font-semibold tracking-[-0.01em]">WebMotiv</span>
               </span>
             </span>
             <button

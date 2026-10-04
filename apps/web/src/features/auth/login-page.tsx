@@ -1,4 +1,3 @@
-import { LogIn } from 'lucide-react';
 import { type FormEvent, useEffect, useState } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router';
 import { useLogin, useMe } from '../../api/auth.ts';
@@ -7,6 +6,7 @@ import { Button } from '../../components/button.tsx';
 import { TextInput } from '../../components/input.tsx';
 import { PasswordInput } from '../../components/password-input.tsx';
 import { CARD, cx, Field, Notice } from '../../components/ui.tsx';
+import { WebMotivMark } from '../../components/webmotiv-mark.tsx';
 
 export function LoginPage() {
   const me = useMe();
@@ -40,9 +40,9 @@ export function LoginPage() {
   return (
     <div className="flex min-h-full flex-col">
       <main className="flex flex-1 flex-col items-center justify-center gap-4 px-4 pb-[16vh]">
-        <div className="flex items-center gap-3">
-          <LogIn aria-hidden className="text-accent" />
-          <h1 className="text-lg font-semibold">Вход в WebMotiv</h1>
+        <div className="flex items-center gap-2.5">
+          <WebMotivMark className="size-7 shrink-0" />
+          <h1 className="text-[25px] font-semibold">WebMotiv</h1>
         </div>
 
         <form
