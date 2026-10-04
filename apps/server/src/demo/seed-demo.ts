@@ -4,20 +4,21 @@
 import { randomUUID } from 'node:crypto';
 import { createReadStream } from 'node:fs';
 import path from 'node:path';
+import { count } from 'drizzle-orm';
 import { type Order, passwordProblem, type StageField, type StageValues } from '@webmotiv/shared';
 import type { PasswordHasher } from '../auth/passwords.ts';
 import { loadAccess } from '../auth/session-store.ts';
 import { generateTemporaryPassword } from '../auth/temporary-password.ts';
-import { ADMIN_ROLE, ensureDefaultRoles, hasUsers } from '../bootstrap.ts';
+import { ADMIN_ROLE, ensureDefaultRoles } from '../bootstrap.ts';
 import type { AppDb } from '../db/db.ts';
-import { roles, userRoles, users } from '../db/schema.ts';
+import { orders, roles, stages, templates, userRoles, users } from '../db/schema.ts';
 import { recordEvent } from '../events/event-log.ts';
 import { FilesService } from '../orders/files-service.ts';
 import { OrdersService, type Viewer } from '../orders/orders-service.ts';
 import type { DataPaths } from '../paths.ts';
 import { StagesService } from '../stages/stages-service.ts';
 import { TemplatesService } from '../templates/templates-service.ts';
-import type { Actor } from '../users/users-service.ts';
+import { type Actor, findUserByLogin } from '../users/users-service.ts';
 
 export const DEMO_FILES_DIR = path.resolve(import.meta.dirname, '../../demo');
 
@@ -326,11 +327,22 @@ export async function seedDemo(
   paths: DataPaths,
   now = new Date(),
 ): Promise<SeedResult> {
-  if (hasUsers(db)) {
+  // Сотрудники могут уже быть (например, свой администратор) — они остаются. А этапы, шаблоны
+  // и заказы — только демо: в базу, где они есть, демо не подмешивается.
+  const used = [orders, stages, templates].some(
+    (table) => (db.select({ count: count() }).from(table).get()?.count ?? 0) > 0,
+  );
+  if (used) {
     throw new SeedError(
-      'В базе уже есть сотрудники. Демо-данные заполняют только пустую базу — ' +
-        'удалите каталог данных (или укажите другой DATA_DIR) и запустите снова.',
+      'В базе уже есть этапы, шаблоны или заказы — демо-данные добавляются только в базу без них. ' +
+        'Удалите каталог данных (или укажите другой DATA_DIR) и запустите снова.',
     );
+  }
+  const taken = DEMO_USERS.filter((user) => findUserByLogin(db, user.login)).map(
+    (user) => user.login,
+  );
+  if (taken.length > 0) {
+    throw new SeedError(`Логины демо-сотрудников уже заняты: ${taken.join(', ')}.`);
   }
   ensureDefaultRoles(db);
   const roleIds = new Map(

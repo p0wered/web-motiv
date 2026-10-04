@@ -64,7 +64,7 @@ export function Notice({
   return (
     <p
       role={tone === 'error' ? 'alert' : 'status'}
-      className={cx('rounded-md px-3 py-2 text-[13px]', NOTICE_TONES[tone], className)}
+      className={cx('rounded-lg px-3 py-2 text-[13px]', NOTICE_TONES[tone], className)}
     >
       {children}
     </p>

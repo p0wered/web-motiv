@@ -62,9 +62,21 @@ describe('seed-demo', () => {
     }
   });
 
-  it('не трогает базу, где уже есть сотрудники', async () => {
+  it('свои сотрудники остаются; в базу с шаблонами или заказами демо не добавляется', async () => {
     const { db, paths } = emptyData();
+    db.insert(users)
+      .values({ login: 'boss', fullName: 'Начальник', passwordHash: 'x', createdAt: new Date() })
+      .run();
     await seedDemo(db, testHasher(), paths);
+    expect(db.select().from(users).all()).toHaveLength(7);
     await expect(seedDemo(db, testHasher(), paths)).rejects.toBeInstanceOf(SeedError);
+  });
+
+  it('не занимает чужие логины', async () => {
+    const { db, paths } = emptyData();
+    db.insert(users)
+      .values({ login: 'Admin', fullName: 'Свой', passwordHash: 'x', createdAt: new Date() })
+      .run();
+    await expect(seedDemo(db, testHasher(), paths)).rejects.toThrow(/admin/);
   });
 });
