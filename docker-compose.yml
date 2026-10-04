@@ -12,11 +12,16 @@ services:
       COOKIE_SECURE: ${COOKIE_SECURE:-auto}
       SESSION_IDLE_MINUTES: ${SESSION_IDLE_MINUTES:-120}
       SESSION_ABSOLUTE_HOURS: ${SESSION_ABSOLUTE_HOURS:-12}
+      BACKUP_TIME: ${BACKUP_TIME:-03:00}
+      BACKUP_KEEP: ${BACKUP_KEEP:-14}
+      BACKUP_DIR: ${BACKUP_DIR:-}
       INITIAL_ADMIN_LOGIN: ${INITIAL_ADMIN_LOGIN:-}
       INITIAL_ADMIN_PASSWORD: ${INITIAL_ADMIN_PASSWORD:-}
       LOG_LEVEL: ${LOG_LEVEL:-info}
     volumes:
       - ./data:/app/data
+      # Копии на другом диске: смонтируйте его и задайте BACKUP_DIR=/app/backups в .env.
+      # - /mnt/backup/webmotiv:/app/backups
     # Корневая ФС только для чтения: писать можно только в data/ и /tmp.
     read_only: true
     tmpfs:

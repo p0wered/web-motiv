@@ -2,6 +2,7 @@ import type { EventGroup } from '@webmotiv/shared';
 import { useState } from 'react';
 import { useEvents } from '../../api/events.ts';
 import { Button } from '../../components/button.tsx';
+import { ON_PAGE } from '../../components/input.tsx';
 import { Page } from '../../components/page.tsx';
 import { Select, type SelectOption } from '../../components/select.tsx';
 import { EmptyState, LoadError, Loading } from '../../components/status.tsx';
@@ -38,7 +39,7 @@ export function AuditPage() {
                 value={group}
                 options={GROUP_OPTIONS}
                 onChange={setGroup}
-                className="rounded-xl"
+                className={cx('rounded-xl', ON_PAGE)}
               />
             )}
           </Field>

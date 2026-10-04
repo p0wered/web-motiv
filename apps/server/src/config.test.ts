@@ -22,4 +22,17 @@ describe('loadConfig', () => {
   it('проверяет порт', () => {
     expect(() => loadConfig({ PORT: '70000' })).toThrow(/PORT/);
   });
+
+  it('бэкапы: по умолчанию в 03:00 в data/backups, off — без расписания', () => {
+    const config = loadConfig({ DATA_DIR: '/srv/webmotiv' });
+    expect(config.backup).toEqual({
+      dir: '/srv/webmotiv/backups',
+      time: { hours: 3, minutes: 0 },
+      keep: 14,
+    });
+    expect(loadConfig({ BACKUP_TIME: 'off' }).backup.time).toBeNull();
+    expect(loadConfig({ BACKUP_TIME: '23:45' }).backup.time).toEqual({ hours: 23, minutes: 45 });
+    expect(() => loadConfig({ BACKUP_TIME: '25:00' })).toThrow(/BACKUP_TIME/);
+    expect(() => loadConfig({ BACKUP_TIME: '3 часа' })).toThrow(/BACKUP_TIME/);
+  });
 });

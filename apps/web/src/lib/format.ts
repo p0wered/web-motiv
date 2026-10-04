@@ -67,6 +67,13 @@ export function initials(fullName: string): string {
   ).toUpperCase();
 }
 
+/** Для узких мест: «Смирнов Алексей Викторович» → «Смирнов А. В.». */
+export function shortName(fullName: string): string {
+  const [surname, ...rest] = fullName.trim().split(/\s+/).filter(Boolean);
+  if (!surname) return '';
+  return [surname, ...rest.map((part) => `${part[0]?.toUpperCase() ?? ''}.`)].join(' ');
+}
+
 const dateOnly = new Intl.DateTimeFormat('ru-RU', {
   day: 'numeric',
   month: 'long',

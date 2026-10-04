@@ -10,6 +10,7 @@ export function testConfig(overrides: Partial<AppConfig> = {}): AppConfig {
     dataDir: '/nonexistent',
     session: { idleMs: 2 * 3_600_000, absoluteMs: 12 * 3_600_000 },
     cookieSecure: false,
+    backup: { dir: '/nonexistent/backups', time: null, keep: 14 },
     initialAdmin: null,
     ...overrides,
   };

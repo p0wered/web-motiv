@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { contentDisposition } from '../api/orders-routes.ts';
 import { createOrder, multipart, PDF, setupOffice } from '../test-support/orders.ts';
 import type { TestApp } from '../test-support/test-app.ts';
 
@@ -370,5 +371,14 @@ describe('файлы заказа', () => {
       headers: as.buh,
     });
     expect(removed.json().stages[1].files).toEqual([]);
+  });
+});
+
+describe('Content-Disposition', () => {
+  it('имя: ASCII-запасное без кавычек и UTF-8 по RFC 5987', () => {
+    expect(contentDisposition('attachment', 'Счёт "№1" (копия)\'s*.pdf')).toBe(
+      'attachment; filename="____ __1_ (_____)\'s*.pdf"; ' +
+        "filename*=UTF-8''%D0%A1%D1%87%D1%91%D1%82%20%22%E2%84%961%22%20%28%D0%BA%D0%BE%D0%BF%D0%B8%D1%8F%29%27s%2A.pdf",
+    );
   });
 });

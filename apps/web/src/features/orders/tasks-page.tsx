@@ -7,7 +7,7 @@ export function TasksPage() {
   const query = useOrders({ view: 'active', tasks: 'true' });
   return (
     <Page title="Мои задачи" description="Заказы, в которых сейчас ваш этап">
-      <OrdersTable query={query} empty={{ title: 'Сейчас ничего не ждёт вас' }} />
+      <OrdersTable query={query} empty={{ title: 'Задач пока нет' }} />
     </Page>
   );
 }

@@ -37,7 +37,12 @@ const downloadQuerySchema = z.strictObject({ inline: z.enum(['1']).optional() })
 /** Имя файла в заголовке: ASCII-заглушка для старых клиентов и точное имя в UTF-8. */
 export function contentDisposition(kind: 'inline' | 'attachment', name: string): string {
   const ascii = name.replace(/[^\x20-\x7e]/g, '_').replace(/["\\]/g, '_');
-  return `${kind}; filename="${ascii}"; filename*=UTF-8''${encodeURIComponent(name)}`;
+  // RFC 5987: encodeURIComponent оставляет ' ( ) * как есть, а в filename* они недопустимы.
+  const encoded = encodeURIComponent(name).replace(
+    /['()*]/g,
+    (char) => `%${char.charCodeAt(0).toString(16).toUpperCase()}`,
+  );
+  return `${kind}; filename="${ascii}"; filename*=UTF-8''${encoded}`;
 }
 
 export function registerOrdersRoutes(

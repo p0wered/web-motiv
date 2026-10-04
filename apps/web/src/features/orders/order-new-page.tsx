@@ -89,18 +89,21 @@ export function OrderNewPage() {
               Шаблонов нет — их создают в разделе «Шаблоны».
             </p>
           )}
-          <div role="radiogroup" aria-label="Шаблон" className="-m-1.5 flex flex-col">
-            {active.map((template) => (
-              <Radio
-                key={template.id}
-                name="template"
-                checked={chosen === template.id}
-                onSelect={() => setTemplateId(template.id)}
-                label={template.name}
-                description={template.stages.map((stage) => stage.name).join(' → ')}
-              />
-            ))}
-          </div>
+          {/* Пустой список не рендерим: его отрицательный отступ съел бы низ карточки. */}
+          {active.length > 0 && (
+            <div role="radiogroup" aria-label="Шаблон" className="-m-1.5 flex flex-col">
+              {active.map((template) => (
+                <Radio
+                  key={template.id}
+                  name="template"
+                  checked={chosen === template.id}
+                  onSelect={() => setTemplateId(template.id)}
+                  label={template.name}
+                  description={template.stages.map((stage) => stage.name).join(' → ')}
+                />
+              ))}
+            </div>
+          )}
         </Section>
       </form>
     </Page>

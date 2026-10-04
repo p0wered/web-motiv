@@ -27,6 +27,22 @@ const trustProxySchema = z
     return list.length > 0 ? list : false;
   });
 
+/** Время ночной копии `ЧЧ:ММ` (местное) или `off`. */
+const backupTimeSchema = z
+  .string()
+  .trim()
+  .transform((value, ctx): { hours: number; minutes: number } | null => {
+    if (value === 'off') return null;
+    const match = /^(\d{1,2}):(\d{2})$/.exec(value);
+    const hours = Number(match?.[1]);
+    const minutes = Number(match?.[2]);
+    if (!match || hours > 23 || minutes > 59) {
+      ctx.addIssue({ code: 'custom', message: 'нужно время ЧЧ:ММ, например 03:00, или off' });
+      return z.NEVER;
+    }
+    return { hours, minutes };
+  });
+
 const envSchema = z.object({
   HOST: z.string().default('0.0.0.0'),
   PORT: z.coerce.number().int().min(1).max(65535).default(3000),
@@ -51,6 +67,10 @@ const envSchema = z.object({
   ),
   // auto — флаг Secure у cookie, если запрос пришёл по HTTPS (за прокси — по X-Forwarded-Proto).
   COOKIE_SECURE: optional(z.enum(['auto', 'true', 'false'])),
+  // Резервные копии: каталог (по умолчанию data/backups), время, сколько хранить.
+  BACKUP_DIR: optional(z.string()),
+  BACKUP_TIME: optional(backupTimeSchema),
+  BACKUP_KEEP: optional(z.coerce.number().int().min(1).max(365)),
   // Первый администратор, если сотрудников ещё нет; при первом входе пароль нужно сменить.
   INITIAL_ADMIN_LOGIN: optional(z.string()),
   INITIAL_ADMIN_PASSWORD: optional(z.string()),
@@ -68,6 +88,12 @@ export interface AppConfig {
   dataDir: string;
   session: { idleMs: number; absoluteMs: number };
   cookieSecure: 'auto' | boolean;
+  backup: {
+    dir: string;
+    /** Местное время ночной копии; `null` — по расписанию не делать. */
+    time: { hours: number; minutes: number } | null;
+    keep: number;
+  };
   initialAdmin: { login: string; password: string } | null;
 }
 
@@ -82,18 +108,26 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
   const values = parsed.data;
   const cookieSecure = values.COOKIE_SECURE ?? 'auto';
   const adminLogin = values.INITIAL_ADMIN_LOGIN?.trim();
+  const dataDir = path.resolve(
+    values.DATA_DIR ?? path.resolve(import.meta.dirname, '../../../data'),
+  );
   return {
     host: values.HOST,
     port: values.PORT,
     logLevel: values.LOG_LEVEL,
     trustProxy: values.TRUST_PROXY ?? false,
     webDistDir: values.WEB_DIST_DIR ?? path.resolve(import.meta.dirname, '../../web/dist'),
-    dataDir: path.resolve(values.DATA_DIR ?? path.resolve(import.meta.dirname, '../../../data')),
+    dataDir,
     session: {
       idleMs: (values.SESSION_IDLE_MINUTES ?? 120) * 60_000,
       absoluteMs: (values.SESSION_ABSOLUTE_HOURS ?? 12) * 3_600_000,
     },
     cookieSecure: cookieSecure === 'auto' ? 'auto' : cookieSecure === 'true',
+    backup: {
+      dir: path.resolve(values.BACKUP_DIR ?? path.join(dataDir, 'backups')),
+      time: values.BACKUP_TIME === undefined ? { hours: 3, minutes: 0 } : values.BACKUP_TIME,
+      keep: values.BACKUP_KEEP ?? 14,
+    },
     initialAdmin:
       adminLogin && values.INITIAL_ADMIN_PASSWORD
         ? { login: adminLogin, password: values.INITIAL_ADMIN_PASSWORD }

@@ -78,10 +78,15 @@ export async function buildApp(config: AppConfig, deps: AppDeps): Promise<Fastif
 
   await app.register(
     async (api) => {
-      api.get('/health', { config: { access: 'public' } }, async (): Promise<HealthResponse> => ({
-        status: 'ok',
-        uptimeSeconds: Math.round(process.uptime()),
-      }));
+      // Healthcheck Docker приходит каждые 30 с — в логах только его ошибки.
+      api.get(
+        '/health',
+        { config: { access: 'public' }, logLevel: 'warn' },
+        async (): Promise<HealthResponse> => ({
+          status: 'ok',
+          uptimeSeconds: Math.round(process.uptime()),
+        }),
+      );
       registerAuthRoutes(api, {
         db: deps.db,
         hasher: deps.hasher,

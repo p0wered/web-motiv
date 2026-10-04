@@ -29,6 +29,7 @@ RUN npm ci --omit=dev --ignore-scripts --workspace @webmotiv/server && npm cache
 COPY packages/shared/src packages/shared/src
 COPY apps/server/src apps/server/src
 COPY apps/server/drizzle apps/server/drizzle
+COPY apps/server/demo apps/server/demo
 COPY --from=build /app/apps/web/dist apps/web/dist
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 COPY docker/webmotiv.sh /usr/local/bin/webmotiv

@@ -4,7 +4,7 @@ import { Badge } from '../../components/badge.tsx';
 import { Button } from '../../components/button.tsx';
 import { EmptyState, LoadError, Loading } from '../../components/status.tsx';
 import { type Column, Table } from '../../components/table.tsx';
-import { formatDateTime } from '../../lib/format.ts';
+import { formatDateTime, shortName } from '../../lib/format.ts';
 import { executorLabel } from '../stages/executor-picker.tsx';
 import { OrderStatusBadge } from './order-status.tsx';
 
@@ -32,7 +32,7 @@ const COLUMNS: Column<OrderSummary>[] = [
             <span className="tabular block text-[13px] text-subtle">
               {order.currentStage.position + 1} из {order.stageCount} ·{' '}
               {order.currentStage.executor === 'responsible'
-                ? order.responsible.fullName
+                ? shortName(order.responsible.fullName)
                 : executorLabel(order.currentStage)}
             </span>
           </span>
@@ -47,7 +47,9 @@ const COLUMNS: Column<OrderSummary>[] = [
     header: 'Ответственный',
     width: 'minmax(150px, 1fr)',
     cell: (order) => (
-      <span className="block truncate text-[13px]">{order.responsible.fullName}</span>
+      <span className="block truncate text-[13px]" title={order.responsible.fullName}>
+        {shortName(order.responsible.fullName)}
+      </span>
     ),
   },
   {

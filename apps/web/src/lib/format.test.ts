@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { describeUserAgent, formatDateTime, initials } from './format.ts';
+import { describeUserAgent, formatDateTime, initials, shortName } from './format.ts';
 
 describe('formatDateTime', () => {
   const now = new Date(2026, 9, 5, 15, 0);
@@ -41,5 +41,13 @@ describe('formatDate, formatFileSize', () => {
     expect(formatFileSize(512)).toBe('512 Б');
     expect(formatFileSize(1536)).toBe('1,5 КБ');
     expect(formatFileSize(25 * 1024 * 1024)).toBe('25 МБ');
+  });
+});
+
+describe('shortName', () => {
+  it('фамилия и инициалы', () => {
+    expect(shortName('Смирнов Алексей Викторович')).toBe('Смирнов А. В.');
+    expect(shortName('  Петрова  анна ')).toBe('Петрова А.');
+    expect(shortName('Администратор')).toBe('Администратор');
   });
 });

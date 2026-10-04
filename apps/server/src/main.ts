@@ -1,6 +1,8 @@
 import pino from 'pino';
 import { buildApp, LOG_REDACT } from './app.ts';
 import { PasswordHasher } from './auth/passwords.ts';
+import { createBackup } from './backup/backup.ts';
+import { scheduleDaily } from './backup/scheduler.ts';
 import { BootstrapError, createAdmin, ensureDefaultRoles, hasUsers } from './bootstrap.ts';
 import { loadConfig } from './config.ts';
 import { openDb } from './db/db.ts';
@@ -43,9 +45,24 @@ if (!hasUsers(db)) {
 
 const app = await buildApp(config, { db, hasher, logger: log });
 
+const stopBackups = config.backup.time
+  ? scheduleDaily(config.backup.time, async () => {
+      try {
+        const result = await createBackup(db, paths, config.backup);
+        log.info(
+          { dir: result.dir, files: result.files, removed: result.removed },
+          'Резервная копия готова',
+        );
+      } catch (error) {
+        log.error(error, 'Резервная копия не удалась');
+      }
+    })
+  : null;
+
 for (const signal of ['SIGINT', 'SIGTERM'] as const) {
   process.once(signal, () => {
     log.info({ signal }, 'Остановка сервера');
+    stopBackups?.();
     app.close().then(
       () => {
         db.$client.close();

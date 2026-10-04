@@ -6,6 +6,7 @@ import { useDirectory, useOrders } from '../../api/orders.ts';
 import { useTemplates } from '../../api/templates.ts';
 import { useCan, useCurrentUser } from '../../app/session.tsx';
 import { buttonClasses } from '../../components/button.tsx';
+import { ON_PAGE } from '../../components/input.tsx';
 import { Page } from '../../components/page.tsx';
 import { Segmented } from '../../components/segmented.tsx';
 import { Select } from '../../components/select.tsx';
@@ -29,7 +30,7 @@ function useDebounced(value: string, delay = 300): string {
 }
 
 // Фильтр — компактный, как строка поиска: высоту и отступ поля формы перекрываем.
-const FILTER_SELECT = 'h-9! rounded-xl! pt-0! text-[13px]';
+const FILTER_SELECT = `h-9! rounded-xl! pt-0! text-[13px] ${ON_PAGE}`;
 
 export function OrdersPage() {
   const me = useCurrentUser();
@@ -60,9 +61,10 @@ export function OrdersPage() {
         )
       }
     >
+      {/* Ряд на всю ширину: лишнее место отдаём поиску, фильтры растут не шире 13rem. */}
       <div className="flex flex-wrap items-center gap-2">
         <Segmented label="Какие заказы показать" value={view} onChange={setView} segments={VIEWS} />
-        <label className="relative min-w-56 flex-1 sm:max-w-80">
+        <label className="relative flex-[3_1_12rem]">
           <span className="sr-only">Поиск по номеру и покупателю</span>
           <Search
             aria-hidden
@@ -79,7 +81,7 @@ export function OrdersPage() {
           />
         </label>
         {canReadTemplates && (
-          <div className="relative w-52">
+          <div className="relative max-w-52 flex-[1_1_10rem]">
             <Select
               id="orders-template"
               aria-label="Шаблон"
@@ -96,7 +98,7 @@ export function OrdersPage() {
             />
           </div>
         )}
-        <div className="relative w-52">
+        <div className="relative max-w-52 flex-[1_1_10rem]">
           <Select
             id="orders-responsible"
             aria-label="Ответственный"

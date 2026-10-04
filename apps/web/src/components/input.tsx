@@ -9,6 +9,12 @@ export const FIELD_INPUT =
   'focus:border-accent focus:bg-surface focus:outline-none focus:ring-0 ' +
   'aria-[invalid=true]:border-danger disabled:opacity-60';
 
+/**
+ * Поле прямо на фоне страницы (фильтры, поиск), а не в карточке: sunken там почти
+ * не отличается от фона, поэтому такие поля — цвета карточки.
+ */
+export const ON_PAGE = 'bg-surface!';
+
 export const TextInput = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement>>(
   // Непустой placeholder нужен, чтобы по :placeholder-shown понять, что поле пустое.
   function TextInput({ className, placeholder = ' ', ...props }, ref) {

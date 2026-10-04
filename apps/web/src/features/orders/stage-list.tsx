@@ -1,6 +1,7 @@
 import type { Order } from '@webmotiv/shared';
 import { Badge } from '../../components/badge.tsx';
 import { CARD, cx } from '../../components/ui.tsx';
+import { shortName } from '../../lib/format.ts';
 import { executorLabel } from '../stages/executor-picker.tsx';
 import { StageMarker } from './order-status.tsx';
 
@@ -56,9 +57,9 @@ export function StageList({
                   </span>
                   <span className="block truncate text-xs text-subtle">
                     {stage.status === 'done'
-                      ? (stage.completedBy?.fullName ?? '')
+                      ? shortName(stage.completedBy?.fullName ?? '')
                       : stage.executor === 'responsible'
-                        ? order.responsible.fullName
+                        ? shortName(order.responsible.fullName)
                         : executorLabel(stage)}
                   </span>
                 </span>

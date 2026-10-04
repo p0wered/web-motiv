@@ -8,7 +8,9 @@ import { PASSWORD_MIN_LENGTH, passwordProblem } from '@webmotiv/shared';
 import { asc } from 'drizzle-orm';
 import { PasswordHasher } from './auth/passwords.ts';
 import { loadAccess, SessionStore } from './auth/session-store.ts';
+import { BackupError, createBackup, listBackups, restoreBackup } from './backup/backup.ts';
 import { BootstrapError, createAdmin } from './bootstrap.ts';
+import { seedDemo, SeedError } from './demo/seed-demo.ts';
 import { PromptCancelledError, promptHidden, promptLine } from './cli/prompt.ts';
 import { loadConfig } from './config.ts';
 import { openDb } from './db/db.ts';
@@ -23,6 +25,10 @@ const HELP = `Использование: webmotiv <команда>
   create-admin            Создать администратора (спросит логин, ФИО и пароль)
   reset-password <логин>  Выдать сотруднику временный пароль (если свой он забыл)
   users                   Список сотрудников и их ролей
+  backup                  Сделать резервную копию сейчас (БД и файлы)
+  backups                 Список резервных копий
+  restore <копия>         Восстановить данные из копии (сервер должен быть остановлен)
+  seed-demo               Заполнить пустую базу демо-данными: сотрудники, шаблоны, заказы
   help                    Показать эту справку
 `;
 
@@ -34,7 +40,7 @@ function openApp() {
   const paths = dataPaths(config.dataDir);
   ensureDataDirs(paths);
   const db = openDb(paths.db);
-  return { config, db };
+  return { config, db, paths };
 }
 
 const ATTEMPTS = 3;
@@ -153,6 +159,89 @@ function usersCommand(): number {
   }
 }
 
+async function backupCommand(): Promise<number> {
+  const { config, db, paths } = openApp();
+  try {
+    const result = await createBackup(db, paths, config.backup);
+    const size = (result.bytes / 1024 / 1024).toFixed(1);
+    console.log(`Копия готова: ${result.dir}`);
+    console.log(`Файлов: ${result.files} (${size} МБ), снимок БД проверен.`);
+    if (result.removed.length > 0) {
+      console.log(
+        `Удалены старые копии (храним ${config.backup.keep}): ${result.removed.join(', ')}`,
+      );
+    }
+    return 0;
+  } catch (error) {
+    if (error instanceof BackupError) {
+      console.error(`Копия не сделана. ${error.message}`);
+      return 1;
+    }
+    throw error;
+  } finally {
+    db.$client.close();
+  }
+}
+
+async function backupsCommand(): Promise<number> {
+  const config = loadConfig();
+  const names = await listBackups(config.backup.dir);
+  if (names.length === 0) {
+    console.log(`Копий нет (${config.backup.dir}). Сделать сейчас: webmotiv backup`);
+    return 0;
+  }
+  console.log(`Копии в ${config.backup.dir}, от старых к новым:`);
+  for (const name of names) console.log(`  ${name}`);
+  return 0;
+}
+
+async function restoreCommand(args: string[]): Promise<number> {
+  const name = args.find((arg) => !arg.startsWith('--'));
+  if (!name) {
+    console.error('Укажите копию: webmotiv restore <копия>. Список: webmotiv backups');
+    return 1;
+  }
+  const config = loadConfig();
+  const paths = dataPaths(config.dataDir);
+  try {
+    const result = await restoreBackup(paths, config.backup.dir, name, {
+      force: args.includes('--force'),
+    });
+    console.log(`Данные восстановлены из копии ${name} (файлов: ${result.files}).`);
+    console.log(`Прежние данные перенесены в ${result.aside} — удалите, когда убедитесь,`);
+    console.log('что всё в порядке. Запустите сервер.');
+    return 0;
+  } catch (error) {
+    if (error instanceof BackupError) {
+      console.error(`Не восстановлено. ${error.message}`);
+      return 1;
+    }
+    throw error;
+  }
+}
+
+async function seedDemoCommand(): Promise<number> {
+  const { db, paths } = openApp();
+  try {
+    const result = await seedDemo(db, new PasswordHasher(), paths);
+    console.log(`Демо-данные созданы: ${result.orders} заказов, 2 шаблона.\n`);
+    console.log('Сотрудники (пароль у всех один):');
+    for (const user of result.users) {
+      console.log(`  ${user.login.padEnd(10)} ${user.fullName} — ${user.role}`);
+    }
+    console.log(`\nПароль: ${result.password}`);
+    return 0;
+  } catch (error) {
+    if (error instanceof SeedError) {
+      console.error(error.message);
+      return 1;
+    }
+    throw error;
+  } finally {
+    db.$client.close();
+  }
+}
+
 const [command, ...rest] = process.argv.slice(2);
 let exitCode: number;
 try {
@@ -165,6 +254,18 @@ try {
       break;
     case 'users':
       exitCode = usersCommand();
+      break;
+    case 'backup':
+      exitCode = await backupCommand();
+      break;
+    case 'backups':
+      exitCode = await backupsCommand();
+      break;
+    case 'restore':
+      exitCode = await restoreCommand(rest);
+      break;
+    case 'seed-demo':
+      exitCode = await seedDemoCommand();
       break;
     case undefined:
     case 'help':
