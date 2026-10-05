@@ -49,7 +49,7 @@ export function Dialog({
         if (event.target === event.currentTarget) onClose();
       }}
       className={cx(
-        'm-auto rounded-2xl bg-surface p-0 text-fg shadow-popover backdrop:bg-black/35 dark:ring-1 dark:ring-line',
+        'm-auto rounded-2xl bg-surface p-0 text-fg shadow-popover backdrop:bg-black/35 backdrop:backdrop-blur-sm dark:ring-1 dark:ring-line',
         size === 'lg'
           ? 'h-[min(900px,calc(100vh-32px))] w-[min(1000px,calc(100vw-32px))]'
           : 'w-[min(440px,calc(100vw-32px))]',
@@ -104,7 +104,12 @@ export function ConfirmDialog({
       actions={
         <>
           <Button onClick={onClose}>Отмена</Button>
-          <Button variant={tone} disabled={pending} onClick={onConfirm} autoFocus>
+          <Button
+            variant={tone === 'danger' ? 'danger-soft' : 'primary'}
+            disabled={pending}
+            onClick={onConfirm}
+            autoFocus
+          >
             {confirmLabel}
           </Button>
         </>

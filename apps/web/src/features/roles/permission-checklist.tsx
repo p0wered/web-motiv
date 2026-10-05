@@ -1,6 +1,6 @@
 import { type Permission, PERMISSION_LABELS, PERMISSIONS } from '@webmotiv/shared';
 import { useCurrentUser } from '../../app/session.tsx';
-import { Checkbox } from '../../components/checkbox.tsx';
+import { Checkbox, CHECKLIST } from '../../components/checkbox.tsx';
 import { PERMISSION_DESCRIPTIONS } from './permission-text.ts';
 
 interface PermissionChecklistProps {
@@ -12,7 +12,7 @@ interface PermissionChecklistProps {
 export function PermissionChecklist({ value, onChange }: PermissionChecklistProps) {
   const me = useCurrentUser();
   return (
-    <div className="-m-1.5 flex flex-col">
+    <div className={CHECKLIST}>
       {PERMISSIONS.map((permission) => (
         <Checkbox
           key={permission}

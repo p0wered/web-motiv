@@ -54,8 +54,8 @@ export const eventSchema = z.object({
 });
 
 export const eventsQuerySchema = z.strictObject({
-  /** Курсор: события с id меньше этого (следующая порция). */
-  before: z.coerce.number().int().positive().optional(),
+  /** Номер страницы, с 1. */
+  page: z.coerce.number().int().min(1).max(100_000).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(50),
   group: z.enum(EVENT_GROUPS).optional(),
   actorId: z.coerce.number().int().positive().optional(),
@@ -63,7 +63,8 @@ export const eventsQuerySchema = z.strictObject({
 
 export const eventsResponseSchema = z.object({
   items: z.array(eventSchema),
-  nextBefore: z.number().nullable(),
+  /** Сколько всего событий по фильтру — для номеров страниц. */
+  total: z.number(),
 });
 
 export type AuditEvent = z.infer<typeof eventSchema>;

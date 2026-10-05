@@ -54,8 +54,8 @@ describe('seed-demo', () => {
       .map((row) => row.at.getTime());
     expect(times).toEqual([...times].sort((a, b) => a - b));
     expect(Math.max(...times)).toBeLessThan(now.getTime());
-    const orderTimes = db.select({ at: orders.createdAt }).from(orders).all();
-    for (const { at } of orderTimes) {
+    // Всё, что создано «вручную», — в будни, в рабочее время.
+    for (const at of times.map((time) => new Date(time))) {
       expect(at.getHours()).toBeGreaterThanOrEqual(9);
       expect(at.getHours()).toBeLessThan(18);
       expect([0, 6]).not.toContain(at.getDay());

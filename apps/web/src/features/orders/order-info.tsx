@@ -192,7 +192,7 @@ function CancelDialog({ order, onClose }: { order: Order; onClose: () => void })
         <>
           <Button onClick={onClose}>Не отменять</Button>
           <Button
-            variant="danger"
+            variant="danger-soft"
             disabled={cancel.isPending}
             onClick={() =>
               cancel.mutate({ version: order.version, reason }, { onSuccess: onClose })

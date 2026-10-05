@@ -19,7 +19,8 @@ const COLUMNS: Column<User>[] = [
       <span className="flex items-center gap-3">
         <span
           aria-hidden
-          className="grid size-8 shrink-0 place-items-center rounded-full bg-sunken text-xs font-semibold text-muted"
+          className="grid size-8 shrink-0 place-items-center
+          rounded-full bg-sunken text-xs font-semibold text-accent"
         >
           {initials(user.fullName)}
         </span>

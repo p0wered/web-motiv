@@ -1,11 +1,5 @@
-// Первый запуск: роли по умолчанию и первый администратор (PLAN.md §5, §7.1).
-import {
-  fullNameSchema,
-  loginSchema,
-  type Permission,
-  PERMISSIONS,
-  passwordProblem,
-} from '@webmotiv/shared';
+// Первый запуск: роль «Администратор» и первый администратор (PLAN.md §5, §7.1).
+import { fullNameSchema, loginSchema, PERMISSIONS, passwordProblem } from '@webmotiv/shared';
 import { count, eq } from 'drizzle-orm';
 import type { PasswordHasher } from './auth/passwords.ts';
 import type { AppDb } from './db/db.ts';
@@ -15,39 +9,13 @@ import { findUserByLogin } from './users/users-service.ts';
 
 export const ADMIN_ROLE = 'Администратор';
 
-/** Роли по умолчанию; для демо «Видеть все заказы» есть у всех. */
-const DEFAULT_ROLES: { name: string; permissions: readonly Permission[] }[] = [
-  { name: ADMIN_ROLE, permissions: PERMISSIONS },
-  {
-    name: 'Руководитель',
-    permissions: [
-      'orders.create',
-      'orders.view_all',
-      'orders.manage',
-      'templates.manage',
-      'audit.view',
-    ],
-  },
-  { name: 'Менеджер', permissions: ['orders.create', 'orders.view_all'] },
-  { name: 'Бухгалтер', permissions: ['orders.view_all'] },
-  { name: 'Закупщик', permissions: ['orders.view_all'] },
-  { name: 'Склад', permissions: ['orders.view_all'] },
-];
-
-/** Создаёт роли по умолчанию, если ролей ещё нет совсем. */
-export function ensureDefaultRoles(db: AppDb): boolean {
+/** Создаёт роль «Администратор» со всеми правами, если ролей ещё нет совсем. */
+export function ensureAdminRole(db: AppDb): boolean {
   const existing = db.select({ count: count() }).from(roles).get()?.count ?? 0;
   if (existing > 0) return false;
   const now = new Date();
   db.insert(roles)
-    .values(
-      DEFAULT_ROLES.map((role) => ({
-        name: role.name,
-        permissions: [...role.permissions],
-        createdAt: now,
-        updatedAt: now,
-      })),
-    )
+    .values({ name: ADMIN_ROLE, permissions: [...PERMISSIONS], createdAt: now, updatedAt: now })
     .run();
   return true;
 }
@@ -77,7 +45,7 @@ export async function createAdmin(
   const problem = passwordProblem(input.password, { login: login.data });
   if (problem) throw new BootstrapError(`Пароль не подходит: ${problem}.`);
   if (findUserByLogin(db, login.data)) throw new BootstrapError('Логин уже занят.');
-  ensureDefaultRoles(db);
+  ensureAdminRole(db);
   const passwordHash = await hasher.hash(input.password);
   return db.transaction((tx) => {
     const role = tx.select().from(roles).where(eq(roles.name, ADMIN_ROLE)).get();

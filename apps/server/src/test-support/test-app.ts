@@ -6,9 +6,9 @@ import type { FastifyInstance } from 'fastify';
 import { buildApp } from '../app.ts';
 import { DEFAULT_LIMITER_OPTIONS, LoginLimiter } from '../auth/login-limiter.ts';
 import { PasswordHasher } from '../auth/passwords.ts';
-import { ensureDefaultRoles } from '../bootstrap.ts';
 import type { AppConfig } from '../config.ts';
 import { type AppDb, openDb } from '../db/db.ts';
+import { ensureDemoRoles } from '../demo/seed-demo.ts';
 import { roles, userRoles, users } from '../db/schema.ts';
 import { dataPaths, ensureDataDirs } from '../paths.ts';
 import { testConfig } from './test-config.ts';
@@ -30,7 +30,8 @@ export async function createTestApp(config: Partial<AppConfig> = {}): Promise<Te
   // Свой каталог данных на каждое приложение — для загружаемых файлов.
   const dataDir = mkdtempSync(path.join(tmpdir(), 'webmotiv-test-'));
   ensureDataDirs(dataPaths(dataDir));
-  ensureDefaultRoles(db);
+  // Тесты пользуются должностями из демо (Менеджер, Бухгалтер, Склад…).
+  ensureDemoRoles(db);
   const hasher = testHasher();
   const loginLimiter = new LoginLimiter(DEFAULT_LIMITER_OPTIONS);
   const app = await buildApp(testConfig({ dataDir, ...config }), { db, hasher, loginLimiter });

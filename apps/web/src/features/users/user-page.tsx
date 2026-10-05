@@ -146,7 +146,7 @@ function RolesSection({ user }: { user: UserDetail }) {
 
 function ActionRow({ title, text, action }: { title: string; text: string; action: ReactNode }) {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
+    <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 py-4">
       <div className="min-w-0 flex-1 basis-64">
         <p className="text-sm font-medium text-fg">{title}</p>
         <p className="mt-0.5 text-[13px] text-subtle">{text}</p>
@@ -164,11 +164,11 @@ function AccessSection({ user }: { user: UserDetail }) {
 
   return (
     <Section title="Доступ">
-      <div className="flex flex-col gap-5">
+      <div className="-my-4 flex flex-col divide-y divide-line">
         <ActionRow
           title="Временный пароль"
           text="Если сотрудник забыл пароль. Прежний перестанет работать, все сеансы завершатся."
-          action={<Button onClick={() => setConfirm('reset')}>Выдать временный пароль</Button>}
+          action={<Button onClick={() => setConfirm('reset')}>Выдать пароль</Button>}
         />
         <ActionRow
           title={user.isActive ? 'Блокировка' : 'Учётная запись заблокирована'}

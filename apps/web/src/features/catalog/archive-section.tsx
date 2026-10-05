@@ -22,7 +22,7 @@ interface ArchiveSectionProps {
 
 function ActionRow({ text, action }: { text: ReactNode; action: ReactNode }) {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
+    <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 py-4">
       <p className="min-w-0 flex-1 basis-64 text-[13px] text-subtle">{text}</p>
       {action}
     </div>
@@ -47,7 +47,7 @@ export function ArchiveSection({
   const [confirmDelete, setConfirmDelete] = useState(false);
   return (
     <Section title={archived ? 'В архиве' : 'Архив'}>
-      <div className="flex flex-col gap-5">
+      <div className="-my-4 flex flex-col divide-y divide-line">
         {archived ? (
           <ActionRow
             text={`Архивный ${noun} нельзя выбрать для новых заказов и нельзя изменить.`}
@@ -84,7 +84,11 @@ export function ArchiveSection({
             </Button>
           }
         />
-        {error && !confirmDelete && <Notice tone="error">{error}</Notice>}
+        {error && !confirmDelete && (
+          <div className="py-4">
+            <Notice tone="error">{error}</Notice>
+          </div>
+        )}
       </div>
       <ConfirmDialog
         open={confirmDelete}

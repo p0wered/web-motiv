@@ -205,7 +205,7 @@ const CASES: Case[] = [
   },
 ];
 
-/** Роль по умолчанию → ожидаемые права (см. bootstrap.ts). */
+/** Роль → ожидаемые права (см. DEMO_ROLES в demo/seed-demo.ts). */
 const ROLES: Record<string, string[]> = {
   Администратор: [
     'users.manage',

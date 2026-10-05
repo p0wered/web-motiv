@@ -208,7 +208,12 @@ export function Select<T extends string>({
         ref={panelRef}
         // Клик по пункту или полосе прокрутки не должен забирать фокус у кнопки.
         onMouseDown={(event) => event.preventDefault()}
-        className={popoverClasses(popover.open, popover.placement, grid ? 'w-max' : undefined)}
+        className={popoverClasses(
+          popover.open,
+          popover.placement,
+          popover.align,
+          grid ? 'w-max' : undefined,
+        )}
       >
         <div
           ref={listRef}

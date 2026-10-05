@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { stages } from '../db/schema.ts';
+import { PERMISSIONS } from '@webmotiv/shared';
+import { ensureAdminRole } from '../bootstrap.ts';
+import { openDb } from '../db/db.ts';
+import { roles, stages } from '../db/schema.ts';
 import { addUser, createTestApp, loginAs, type TestApp } from '../test-support/test-app.ts';
 
 async function setup() {
@@ -15,7 +18,16 @@ async function roleByName(t: TestApp, headers: Record<string, string>, name: str
 }
 
 describe('роли', () => {
-  it('по умолчанию созданы шесть ролей', async () => {
+  it('на чистой установке есть только «Администратор»', async () => {
+    const db = openDb(':memory:');
+    expect(ensureAdminRole(db)).toBe(true);
+    expect(ensureAdminRole(db)).toBe(false);
+    expect(db.select().from(roles).all()).toMatchObject([
+      { name: 'Администратор', permissions: [...PERMISSIONS] },
+    ]);
+  });
+
+  it('демо добавляет пять должностей', async () => {
     const { t, admin } = await setup();
     const list = (await t.app.inject({ url: '/api/roles', headers: admin })).json();
     expect(list.map((role: { name: string }) => role.name).sort()).toEqual(

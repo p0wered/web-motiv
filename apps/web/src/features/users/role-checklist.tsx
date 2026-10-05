@@ -1,6 +1,6 @@
 import { useRoles } from '../../api/roles.ts';
 import { useCurrentUser } from '../../app/session.tsx';
-import { Checkbox } from '../../components/checkbox.tsx';
+import { Checkbox, CHECKLIST } from '../../components/checkbox.tsx';
 import { LoadError, Loading } from '../../components/status.tsx';
 import { permissionsSummary } from '../roles/permission-text.ts';
 
@@ -24,7 +24,7 @@ export function RoleChecklist({ value, onChange }: RoleChecklistProps) {
     );
   }
   return (
-    <div className="-m-1.5 flex flex-col">
+    <div className={CHECKLIST}>
       {roles.data.map((role) => {
         const grantable = role.permissions.every((permission) =>
           me.permissions.includes(permission),

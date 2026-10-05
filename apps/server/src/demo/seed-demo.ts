@@ -5,11 +5,17 @@ import { randomUUID } from 'node:crypto';
 import { createReadStream } from 'node:fs';
 import path from 'node:path';
 import { count } from 'drizzle-orm';
-import { type Order, passwordProblem, type StageField, type StageValues } from '@webmotiv/shared';
+import {
+  type Order,
+  type Permission,
+  passwordProblem,
+  type StageField,
+  type StageValues,
+} from '@webmotiv/shared';
 import type { PasswordHasher } from '../auth/passwords.ts';
 import { loadAccess } from '../auth/session-store.ts';
 import { generateTemporaryPassword } from '../auth/temporary-password.ts';
-import { ADMIN_ROLE, ensureDefaultRoles } from '../bootstrap.ts';
+import { ADMIN_ROLE, ensureAdminRole } from '../bootstrap.ts';
 import type { AppDb } from '../db/db.ts';
 import { orders, roles, stages, templates, userRoles, users } from '../db/schema.ts';
 import { recordEvent } from '../events/event-log.ts';
@@ -23,6 +29,49 @@ import { type Actor, findUserByLogin } from '../users/users-service.ts';
 export const DEMO_FILES_DIR = path.resolve(import.meta.dirname, '../../demo');
 
 export class SeedError extends Error {}
+
+/** Должности офиса для демо; «Видеть все заказы» есть у всех. На чистой установке только «Администратор». */
+export const DEMO_ROLES: { name: string; permissions: readonly Permission[] }[] = [
+  {
+    name: 'Руководитель',
+    permissions: [
+      'orders.create',
+      'orders.view_all',
+      'orders.manage',
+      'templates.manage',
+      'audit.view',
+    ],
+  },
+  { name: 'Менеджер', permissions: ['orders.create', 'orders.view_all'] },
+  { name: 'Бухгалтер', permissions: ['orders.view_all'] },
+  { name: 'Закупщик', permissions: ['orders.view_all'] },
+  { name: 'Склад', permissions: ['orders.view_all'] },
+];
+
+/** Роль «Администратор» и демо-роли, которых ещё нет; существующие роли не трогает. */
+export function ensureDemoRoles(db: AppDb): void {
+  ensureAdminRole(db);
+  const existing = new Set(
+    db
+      .select({ name: roles.name })
+      .from(roles)
+      .all()
+      .map((role) => role.name),
+  );
+  const missing = DEMO_ROLES.filter((role) => !existing.has(role.name));
+  if (missing.length === 0) return;
+  const now = new Date();
+  db.insert(roles)
+    .values(
+      missing.map((role) => ({
+        name: role.name,
+        permissions: [...role.permissions],
+        createdAt: now,
+        updatedAt: now,
+      })),
+    )
+    .run();
+}
 
 const DEMO_USERS = [
   { key: 'admin', login: 'admin', fullName: 'Белова Ольга Николаевна', role: ADMIN_ROLE },
@@ -344,7 +393,7 @@ export async function seedDemo(
   if (taken.length > 0) {
     throw new SeedError(`Логины демо-сотрудников уже заняты: ${taken.join(', ')}.`);
   }
-  ensureDefaultRoles(db);
+  ensureDemoRoles(db);
   const roleIds = new Map(
     db
       .select()
@@ -362,7 +411,7 @@ export async function seedDemo(
     const roleId = roleIds.get(user.role);
     if (roleId === undefined) throw new SeedError(`Нет роли «${user.role}».`);
     const passwordHash = await hasher.hash(password);
-    ids[user.key] = await at(db, new Date(now.getTime() - 30 * DAY + index * 600_000), () =>
+    ids[user.key] = await at(db, new Date(workMorning(now, 30, 40 + index * 10)), () =>
       db.transaction((tx) => {
         const created = tx
           .insert(users)
@@ -409,7 +458,7 @@ export async function seedDemo(
   const stagesService = new StagesService(db);
   const templatesService = new TemplatesService(db);
   const stageIds = {} as Record<StageKey, number>;
-  let clock = now.getTime() - 28 * DAY;
+  let clock = workMorning(now, 28, 60);
   for (const [key, stage] of Object.entries(STAGES) as [StageKey, (typeof STAGES)[StageKey]][]) {
     const executorRoleId = stage.role === null ? null : (roleIds.get(stage.role) ?? null);
     clock += 0.2 * HOUR;
@@ -529,7 +578,7 @@ export async function seedDemo(
       });
       if (!isDraft) {
         // «Готово» — через четверть часа; следующий шаг заказа отсчитывается от него.
-        time = Math.min(when + 15 * 60_000, latest);
+        time = Math.min(workTime(when + 15 * 60_000), latest);
         schedule.push({
           when: time,
           run: async () => {

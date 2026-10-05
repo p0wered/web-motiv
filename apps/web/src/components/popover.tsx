@@ -1,12 +1,21 @@
-import { type RefObject, useCallback, useState } from 'react';
+import { type RefObject, useCallback, useLayoutEffect, useState } from 'react';
 import { cx } from './ui.tsx';
 
 type Placement = 'bottom' | 'top';
+/** От какого края поля панель: `start` — растёт вправо, `end` — прижата справа и растёт влево. */
+type Align = 'start' | 'end';
+
+/** Отступ панели от края области контента. */
+const EDGE = 8;
 
 /**
  * Состояние выпадающей панели у поля формы. Панель всегда в DOM (скрыта через
  * visibility), поэтому её высоту можно измерить до открытия и развернуть её вверх,
  * если снизу не помещается, а закрытие анимируется так же, как открытие.
+ *
+ * Скрытая панель тоже занимает место: если она шире поля и вылезает за правый край, у области
+ * контента появляется горизонтальная прокрутка. Поэтому такая панель прижимается к правому краю
+ * поля — пересчёт при изменении ширины панели (пункты приходят с сервера) и области.
  */
 export function usePopover(
   anchorRef: RefObject<HTMLElement | null>,
@@ -14,6 +23,26 @@ export function usePopover(
 ) {
   const [open, setOpen] = useState(false);
   const [placement, setPlacement] = useState<Placement>('bottom');
+  const [align, setAlign] = useState<Align>('start');
+
+  useLayoutEffect(() => {
+    const anchor = anchorRef.current;
+    const panel = panelRef.current;
+    if (!anchor || !panel) return;
+    const area = anchor.closest('main') ?? document.documentElement;
+    const measure = () => {
+      const rect = anchor.getBoundingClientRect();
+      const right = area.getBoundingClientRect().left + area.clientWidth - EDGE;
+      const overflows = rect.left + panel.offsetWidth > right;
+      // Влево — только если там есть место; иначе пусть лучше вылезает вправо.
+      setAlign(overflows && rect.right - panel.offsetWidth >= EDGE ? 'end' : 'start');
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(panel);
+    observer.observe(area);
+    return () => observer.disconnect();
+  }, [anchorRef, panelRef]);
 
   const show = () => {
     const anchor = anchorRef.current?.getBoundingClientRect();
@@ -28,7 +57,7 @@ export function usePopover(
   // Стабильная ссылка: hide удобно передавать в зависимости эффектов.
   const hide = useCallback(() => setOpen(false), []);
 
-  return { open, placement, show, hide };
+  return { open, placement, align, show, hide };
 }
 
 /** Карточка выпадающей панели над содержимым и её появление; положение задаёт вызывающий. */
@@ -44,14 +73,29 @@ export function popoverSurface(open: boolean): string {
   );
 }
 
-/** Классы панели у поля формы: появляется от края поля. */
-export function popoverClasses(open: boolean, placement: Placement, className?: string): string {
+/** Положение панели относительно поля: сверху или снизу, от левого или правого края. */
+export function popoverPosition(placement: Placement, align: Align): string {
   return cx(
-    popoverSurface(open),
-    'left-0 min-w-full',
-    placement === 'top' ? 'bottom-full mb-1.5 origin-bottom' : 'top-full mt-1.5 origin-top',
-    className,
+    align === 'end' ? 'right-0' : 'left-0',
+    placement === 'top' ? 'bottom-full mb-1.5' : 'top-full mt-1.5',
+    placement === 'top'
+      ? align === 'end'
+        ? 'origin-bottom-right'
+        : 'origin-bottom-left'
+      : align === 'end'
+        ? 'origin-top-right'
+        : 'origin-top-left',
   );
+}
+
+/** Классы панели у поля формы: появляется от края поля. */
+export function popoverClasses(
+  open: boolean,
+  placement: Placement,
+  align: Align,
+  className?: string,
+): string {
+  return cx(popoverSurface(open), 'min-w-full', popoverPosition(placement, align), className);
 }
 
 /** Прокрутить список так, чтобы пункт был виден (или стоял по центру — при открытии). */

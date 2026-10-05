@@ -1,6 +1,6 @@
 // Журнал событий (PLAN.md §7.5): только добавление, API на изменение и удаление нет.
 import type { AuditEvent, EventAction, EventGroup } from '@webmotiv/shared';
-import { and, desc, eq, like, lt } from 'drizzle-orm';
+import { and, count, desc, eq, like } from 'drizzle-orm';
 import type { AppDb, Tx } from '../db/db.ts';
 import { events, users } from '../db/schema.ts';
 
@@ -31,7 +31,8 @@ export function recordEvent(tx: Tx | AppDb, input: EventInput, now = new Date())
 }
 
 export interface EventFilter {
-  before?: number | undefined;
+  /** Номер страницы, с 1. */
+  page?: number | undefined;
   limit: number;
   group?: EventGroup | undefined;
   actorId?: number | undefined;
@@ -39,11 +40,17 @@ export interface EventFilter {
   orderId?: number | undefined;
 }
 
-/** Порция событий от новых к старым и курсор следующей. */
+/** Страница событий от новых к старым и сколько их всего по фильтру. */
 export function queryEvents(
   db: AppDb,
   filter: EventFilter,
-): { items: AuditEvent[]; nextBefore: number | null } {
+): { items: AuditEvent[]; total: number } {
+  const where = and(
+    filter.group ? like(events.action, `${filter.group}.%`) : undefined,
+    filter.actorId ? eq(events.actorId, filter.actorId) : undefined,
+    filter.orderId ? eq(events.orderId, filter.orderId) : undefined,
+  );
+  const total = db.select({ count: count() }).from(events).where(where).get()?.count ?? 0;
   const rows = db
     .select({
       event: events,
@@ -51,21 +58,14 @@ export function queryEvents(
     })
     .from(events)
     .leftJoin(users, eq(users.id, events.actorId))
-    .where(
-      and(
-        filter.before ? lt(events.id, filter.before) : undefined,
-        filter.group ? like(events.action, `${filter.group}.%`) : undefined,
-        filter.actorId ? eq(events.actorId, filter.actorId) : undefined,
-        filter.orderId ? eq(events.orderId, filter.orderId) : undefined,
-      ),
-    )
+    .where(where)
     .orderBy(desc(events.id))
-    .limit(filter.limit + 1)
+    .limit(filter.limit)
+    .offset(((filter.page ?? 1) - 1) * filter.limit)
     .all();
 
-  const page = rows.slice(0, filter.limit);
   return {
-    items: page.map(({ event, actor }) => ({
+    items: rows.map(({ event, actor }) => ({
       id: event.id,
       at: event.at.toISOString(),
       actor: actor?.id ? actor : null,
@@ -75,6 +75,6 @@ export function queryEvents(
       ip: event.ip,
       payload: event.payload,
     })),
-    nextBefore: rows.length > filter.limit ? (page.at(-1)?.event.id ?? null) : null,
+    total,
   };
 }

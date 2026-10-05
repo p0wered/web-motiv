@@ -69,7 +69,7 @@ export function Segmented<T extends string>({
           aria-hidden
           style={{ width: thumb.width, transform: `translateX(${thumb.left}px)` }}
           className={cx(
-            'pointer-events-none absolute inset-y-1 left-0 rounded-lg bg-sunken dark:bg-line-strong',
+            'pointer-events-none absolute inset-y-1 left-0 rounded-lg bg-sunken dark:bg-line',
             animated &&
               'transition-[transform,width] duration-250 ease-[cubic-bezier(0.32,0.72,0,1)] motion-reduce:transition-none',
           )}

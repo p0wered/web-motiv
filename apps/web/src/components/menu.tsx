@@ -1,7 +1,7 @@
 import type { LucideIcon } from 'lucide-react';
 import { type KeyboardEvent, type ReactNode, useEffect, useId, useRef } from 'react';
 import { buttonClasses } from './button.tsx';
-import { popoverSurface, usePopover } from './popover.tsx';
+import { popoverPosition, popoverSurface, usePopover } from './popover.tsx';
 import { cx } from './ui.tsx';
 
 export interface MenuItem {
@@ -32,7 +32,7 @@ export function MenuButton({
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   // Снизу не помещается — меню открывается вверх (как выпадающие списки полей).
-  const { open, placement, show, hide: close } = usePopover(triggerRef, menuRef);
+  const { open, placement, align, show, hide: close } = usePopover(triggerRef, menuRef);
   const menuId = useId();
 
   const hide = (returnFocus = false) => {
@@ -106,13 +106,7 @@ export function MenuButton({
         aria-label={menuLabel}
         inert={!open}
         onKeyDown={onMenuKeyDown}
-        className={cx(
-          popoverSurface(open),
-          'left-0 w-72',
-          placement === 'top'
-            ? 'bottom-full mb-1.5 origin-bottom-left'
-            : 'top-full mt-1.5 origin-top-left',
-        )}
+        className={cx(popoverSurface(open), 'w-72', popoverPosition(placement, align))}
       >
         {items.map(({ id, label: itemLabel, description, icon: ItemIcon, onSelect }) => (
           <button

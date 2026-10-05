@@ -12,6 +12,13 @@ interface CheckboxProps {
 }
 
 /**
+ * Список флажков: между строками линия, короче строки на радиус скругления (rounded-lg) с обеих
+ * сторон — чтобы подсветка строки при наведении и линия не расходились по краям.
+ */
+export const CHECKLIST =
+  '-m-1.5 flex flex-col [&>label]:py-3 [&>label:not(:first-child)]:before:absolute [&>label:not(:first-child)]:before:inset-x-2 [&>label:not(:first-child)]:before:top-0 [&>label:not(:first-child)]:before:h-px [&>label:not(:first-child)]:before:bg-line';
+
+/**
  * Флажок строкой списка: вся строка кликабельна, сам input — для клавиатуры и чтения с экрана.
  * Строка `relative`: скрытый input стоит внутри неё, и фокус на нём не прокручивает страницу.
  */

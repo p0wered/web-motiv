@@ -2,7 +2,7 @@ import type { LucideIcon } from 'lucide-react';
 import { type ButtonHTMLAttributes, forwardRef } from 'react';
 import { cx } from './ui.tsx';
 
-type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'danger-soft' | 'danger-ghost';
+type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger-soft' | 'danger-ghost';
 /** `lg` — в хедере: по высоте совпадает со строкой поиска (h-10). */
 type ButtonSize = 'md' | 'lg';
 /** `xl` — у кнопок действий в шапке страницы. */
@@ -20,9 +20,7 @@ const BUTTON_VARIANTS: Record<ButtonVariant, string> = {
   secondary: `bg-sunken text-fg hover:text-accent ${ACCENT_FRAME}`,
   // Без фона в покое; при наведении акцентом окрашивается только иконка, текст остаётся.
   ghost: `text-fg ${ACCENT_FRAME} [&_svg]:transition-colors hover:[&_svg]:text-accent`,
-  // Необратимое действие (блокировка, удаление) — только в подтверждении, не на странице.
-  danger: 'bg-danger-solid text-white hover:bg-danger-solid/90',
-  // Опасные действия на странице: «Удалить», «Заблокировать». Подтверждаются диалогом.
+  // Опасные действия: «Удалить», «Заблокировать» — и на странице, и в подтверждении.
   'danger-soft': 'border border-transparent bg-danger-soft text-danger hover:border-danger/50',
   'danger-ghost':
     'border border-transparent text-danger hover:border-danger/50 hover:bg-danger-soft',

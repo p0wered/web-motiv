@@ -3,7 +3,7 @@ import { buildApp, LOG_REDACT } from './app.ts';
 import { PasswordHasher } from './auth/passwords.ts';
 import { createBackup } from './backup/backup.ts';
 import { scheduleDaily } from './backup/scheduler.ts';
-import { BootstrapError, createAdmin, ensureDefaultRoles, hasUsers } from './bootstrap.ts';
+import { BootstrapError, createAdmin, ensureAdminRole, hasUsers } from './bootstrap.ts';
 import { loadConfig } from './config.ts';
 import { openDb } from './db/db.ts';
 import { dataPaths, ensureDataDirs } from './paths.ts';
@@ -16,7 +16,7 @@ ensureDataDirs(paths);
 const db = openDb(paths.db);
 const hasher = new PasswordHasher();
 
-if (ensureDefaultRoles(db)) log.info('Созданы роли по умолчанию');
+if (ensureAdminRole(db)) log.info('Создана роль «Администратор»');
 if (!hasUsers(db)) {
   if (config.initialAdmin) {
     try {
