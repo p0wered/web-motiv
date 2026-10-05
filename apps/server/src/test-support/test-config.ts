@@ -12,6 +12,7 @@ export function testConfig(overrides: Partial<AppConfig> = {}): AppConfig {
     cookieSecure: false,
     backup: { dir: '/nonexistent/backups', time: null, keep: 14 },
     initialAdmin: null,
+    demoPassword: null, // ДЕМО-TIMEWEB: убрать до релиза
     ...overrides,
   };
 }

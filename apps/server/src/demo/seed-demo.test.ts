@@ -20,7 +20,7 @@ describe('seed-demo', () => {
   it('заполняет пустую базу: сотрудники, заказы на разных этапах, файлы, история по порядку', async () => {
     const { db, paths } = emptyData();
     const now = new Date('2026-10-07T15:00:00');
-    const result = await seedDemo(db, testHasher(), paths, now);
+    const result = await seedDemo(db, testHasher(), paths, { now });
 
     expect(result.users.map((user) => user.login)).toEqual([
       'admin',
@@ -78,5 +78,18 @@ describe('seed-demo', () => {
       .values({ login: 'Admin', fullName: 'Свой', passwordHash: 'x', createdAt: new Date() })
       .run();
     await expect(seedDemo(db, testHasher(), paths)).rejects.toThrow(/admin/);
+  });
+
+  // ДЕМО-TIMEWEB: убрать до релиза вместе с DEMO_PASSWORD.
+  it('заданный пароль — у всех демо-сотрудников; слабый не принимается', async () => {
+    const { db, paths } = emptyData();
+    await expect(
+      seedDemo(db, testHasher(), paths, { password: 'admin-demo-2026' }),
+    ).rejects.toThrow(/логин/);
+    const hasher = testHasher();
+    await seedDemo(db, hasher, paths, { password: 'синий трактор едет' });
+    for (const user of db.select().from(users).all()) {
+      expect(await hasher.verify('синий трактор едет', user.passwordHash)).toBe(true);
+    }
   });
 });

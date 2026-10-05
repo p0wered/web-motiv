@@ -74,6 +74,9 @@ const envSchema = z.object({
   // Первый администратор, если сотрудников ещё нет; при первом входе пароль нужно сменить.
   INITIAL_ADMIN_LOGIN: optional(z.string()),
   INITIAL_ADMIN_PASSWORD: optional(z.string()),
+  // ДЕМО-TIMEWEB: пустая база при запуске заполняется демо-данными с этим паролем — для показа
+  // на Timeweb App Platform, где нет консоли для `seed-demo`. Убрать до релиза.
+  DEMO_PASSWORD: optional(z.string()),
 });
 
 export interface AppConfig {
@@ -95,6 +98,8 @@ export interface AppConfig {
     keep: number;
   };
   initialAdmin: { login: string; password: string } | null;
+  /** ДЕМО-TIMEWEB: пароль демо-сотрудников для автозаполнения пустой базы; убрать до релиза. */
+  demoPassword: string | null;
 }
 
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
@@ -132,5 +137,6 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
       adminLogin && values.INITIAL_ADMIN_PASSWORD
         ? { login: adminLogin, password: values.INITIAL_ADMIN_PASSWORD }
         : null,
+    demoPassword: values.DEMO_PASSWORD ?? null,
   };
 }

@@ -303,6 +303,25 @@ events           id, at, actor_id, action, entity_type, entity_id, order_id, ip,
 
 Шаблон «Заказ со склада» — те же этапы без 4 и 5.
 
+### 9.1. Демо на Timeweb App Platform (временно)
+
+Показ с Timeweb App Platform (2026-10-05): сборка из `Dockerfile` из GitHub, своей команды
+запуска и консоли нет, база пересоздаётся при каждом деплое. Поэтому `DEMO_PASSWORD`: если он
+задан и в базе нет сотрудников, сервер при запуске сам выполняет seed-demo с этим паролем.
+
+Переменные приложения в Timeweb: `DEMO_PASSWORD` (от 12 символов, без логинов демо-сотрудников),
+`TZ=Europe/Moscow` (история демо — в рабочие часы по Москве), `COOKIE_SECURE=true` (HTTPS
+снимает прокси Timeweb, до приложения запрос доходит по HTTP), `BACKUP_TIME=off`. Путь проверки
+состояния — `/api/health`.
+
+**Перед релизом убрать** — в итоговой версии демо-данных нет:
+
+- всё с меткой `ДЕМО-TIMEWEB` (`grep -rn ДЕМО-TIMEWEB apps`): `DEMO_PASSWORD` в `config.ts` и
+  `main.ts`, параметр `password` у `seedDemo` (вернуть `now` позиционным), `test-config.ts` и тесты;
+- сам seed-demo: команда в `cli.ts`, `apps/server/src/demo/`, документы `apps/server/demo/`,
+  `COPY apps/server/demo` в `Dockerfile`, раздел «Демо» в README;
+- приложение в Timeweb.
+
 ## 10. Фазы
 
 0. **Каркас.** Монорепо, линтер, форматтер, тесты, типы; Docker (не root, read-only,

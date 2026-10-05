@@ -374,7 +374,8 @@ export async function seedDemo(
   db: AppDb,
   hasher: PasswordHasher,
   paths: DataPaths,
-  now = new Date(),
+  // ДЕМО-TIMEWEB: `password` — только для показа на Timeweb (DEMO_PASSWORD), убрать до релиза.
+  { now = new Date(), password: fixedPassword }: { now?: Date; password?: string } = {},
 ): Promise<SeedResult> {
   // Сотрудники могут уже быть (например, свой администратор) — они остаются. А этапы, шаблоны
   // и заказы — только демо: в базу, где они есть, демо не подмешивается.
@@ -402,7 +403,15 @@ export async function seedDemo(
       .map((role) => [role.name, role.id]),
   );
 
-  let password = generateTemporaryPassword();
+  // ДЕМО-TIMEWEB: пароль задан (DEMO_PASSWORD) — проверяем по тем же правилам, что и пароли сотрудников.
+  const fixedProblem =
+    fixedPassword === undefined
+      ? null
+      : DEMO_USERS.map((user) => passwordProblem(fixedPassword, { login: user.login })).find(
+          Boolean,
+        );
+  if (fixedProblem) throw new SeedError(`Пароль демо-сотрудников не подходит: ${fixedProblem}.`);
+  let password = fixedPassword ?? generateTemporaryPassword();
   while (passwordProblem(password)) password = generateTemporaryPassword();
 
   // Сотрудники — месяц назад.

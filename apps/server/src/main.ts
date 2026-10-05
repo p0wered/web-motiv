@@ -6,6 +6,7 @@ import { scheduleDaily } from './backup/scheduler.ts';
 import { BootstrapError, createAdmin, ensureAdminRole, hasUsers } from './bootstrap.ts';
 import { loadConfig } from './config.ts';
 import { openDb } from './db/db.ts';
+import { seedDemo, SeedError } from './demo/seed-demo.ts';
 import { dataPaths, ensureDataDirs } from './paths.ts';
 
 const config = loadConfig();
@@ -18,7 +19,21 @@ const hasher = new PasswordHasher();
 
 if (ensureAdminRole(db)) log.info('Создана роль «Администратор»');
 if (!hasUsers(db)) {
-  if (config.initialAdmin) {
+  // ДЕМО-TIMEWEB: на Timeweb App Platform нет консоли для `seed-demo`, а база пересоздаётся при
+  // каждом деплое — заполняем её демо-данными при запуске. Убрать до релиза.
+  if (config.demoPassword) {
+    try {
+      const result = await seedDemo(db, hasher, paths, { password: config.demoPassword });
+      log.info(
+        { logins: result.users.map((user) => user.login), orders: result.orders },
+        'Демо-данные созданы из DEMO_PASSWORD',
+      );
+    } catch (error) {
+      if (!(error instanceof SeedError)) throw error;
+      log.fatal(error.message);
+      process.exit(1);
+    }
+  } else if (config.initialAdmin) {
     try {
       await createAdmin(db, hasher, {
         login: config.initialAdmin.login,

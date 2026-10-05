@@ -35,4 +35,13 @@ describe('loadConfig', () => {
     expect(() => loadConfig({ BACKUP_TIME: '25:00' })).toThrow(/BACKUP_TIME/);
     expect(() => loadConfig({ BACKUP_TIME: '3 часа' })).toThrow(/BACKUP_TIME/);
   });
+
+  // ДЕМО-TIMEWEB: убрать до релиза вместе с DEMO_PASSWORD.
+  it('DEMO_PASSWORD: пустая строка — не задан', () => {
+    expect(loadConfig({}).demoPassword).toBeNull();
+    expect(loadConfig({ DEMO_PASSWORD: '' }).demoPassword).toBeNull();
+    expect(loadConfig({ DEMO_PASSWORD: 'синий трактор едет' }).demoPassword).toBe(
+      'синий трактор едет',
+    );
+  });
 });
